@@ -1,7 +1,8 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ProjectItem from '@/components/ProjectItem';
 import CustomCursor from '@/components/CustomCursor';
+import FloatingContactButton from '@/components/FloatingContactButton';
 
 // Expanded project data with more examples
 const projects = [
@@ -74,11 +75,47 @@ const projects = [
     thumbnail: 'https://images.unsplash.com/photo-1542744173-8659b8e76b1e',
     type: 'image' as const,
     aspectRatio: 'aspect-[4/3]'
+  },
+  {
+    id: '11',
+    title: 'Modern Typography',
+    thumbnail: 'https://images.unsplash.com/photo-1561070791-2526d30994b5',
+    type: 'image' as const,
+    aspectRatio: 'aspect-[16/9]'
+  },
+  {
+    id: '12',
+    title: 'Editorial Design',
+    thumbnail: 'https://images.unsplash.com/photo-1544568100-847a948585b9',
+    type: 'image' as const,
+    aspectRatio: 'aspect-[1/1]'
+  },
+  {
+    id: '13',
+    title: 'Abstract Art',
+    thumbnail: 'https://images.unsplash.com/photo-1552084117-56a987666449',
+    type: 'image' as const,
+    aspectRatio: 'aspect-[3/4]'
+  },
+  {
+    id: '14',
+    title: 'Minimalist Posters',
+    thumbnail: 'https://images.unsplash.com/photo-1545178803-771a97c5eabd',
+    type: 'image' as const,
+    aspectRatio: 'aspect-[2/3]'
+  },
+  {
+    id: '15',
+    title: 'Colorful Illustrations',
+    thumbnail: 'https://images.unsplash.com/photo-1501366062246-723b4d3e4eb6',
+    type: 'image' as const,
+    aspectRatio: 'aspect-[4/3]'
   }
 ];
 
 const Index: React.FC = () => {
   const contentRef = useRef<HTMLDivElement>(null);
+  const [scrolled, setScrolled] = useState(false);
   
   // Restore scroll position after navigation
   useEffect(() => {
@@ -92,6 +129,7 @@ const Index: React.FC = () => {
 
     const handleScroll = () => {
       sessionStorage.setItem('scrollPosition', window.scrollY.toString());
+      setScrolled(window.scrollY > 50);
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -102,20 +140,20 @@ const Index: React.FC = () => {
     <div className="min-h-screen relative overflow-hidden bg-portfolio-white">
       <CustomCursor />
       
-      {/* Header - Simple and clean */}
+      {/* Header - With name properly centered */}
       <header className="w-full py-8 px-6 md:px-12 lg:px-20 fixed top-0 z-40 bg-portfolio-white">
         <div className="w-full flex justify-between items-center">
-          <div className="text-portfolio-charcoal text-sm md:text-base tracking-wider">
+          <div className="text-portfolio-charcoal text-sm md:text-base tracking-wider w-1/3 text-left">
             GRAPHIC DESIGNER
           </div>
           
-          <div className="text-center">
+          <div className="text-center w-1/3">
             <h1 className="font-serif text-xl md:text-2xl lg:text-3xl tracking-wider text-portfolio-charcoal">
               RAJENDRA DAMAR
             </h1>
           </div>
           
-          <div>
+          <div className="w-1/3 text-right">
             <a 
               href="/contact" 
               className="text-portfolio-charcoal hover:text-portfolio-darkGray text-sm md:text-base tracking-wider transition-colors"
@@ -124,6 +162,10 @@ const Index: React.FC = () => {
             </a>
           </div>
         </div>
+        
+        {/* Purple flare element */}
+        <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-dark-orchid opacity-15 blur-3xl -z-10 animate-pulse-slow"></div>
+        <div className="absolute bottom-0 left-1/4 w-96 h-96 rounded-full bg-dark-orchid opacity-10 blur-3xl -z-10"></div>
       </header>
       
       {/* Projects Gallery Section */}
@@ -145,6 +187,8 @@ const Index: React.FC = () => {
           ))}
         </div>
       </main>
+      
+      {scrolled && <FloatingContactButton />}
     </div>
   );
 };
