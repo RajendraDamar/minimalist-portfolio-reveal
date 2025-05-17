@@ -119,8 +119,8 @@ export default {
 				'slide-down': 'slide-down 0.5s ease-out forwards'
 			},
 			fontFamily: {
-				'sans': ['Outfit', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-				'serif': ['DM Serif Display', 'Georgia', 'serif'],
+				'sans': ['Work Sans', 'Outfit', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+				'serif': ['Outfit', 'DM Serif Display', 'Georgia', 'serif'],
 				'mono': ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'monospace']
 			}
 		}

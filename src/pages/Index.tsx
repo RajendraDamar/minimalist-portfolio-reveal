@@ -1,12 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
-import Slideshow from '@/components/Slideshow';
-import ProjectItem from '@/components/ProjectItem';
-import FloatingContactButton from '@/components/FloatingContactButton';
-import CustomCursor from '@/components/CustomCursor';
-import { ArrowDown } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
-// Placeholder data - Replace with your actual projects
+import React, { useEffect, useRef } from 'react';
+import ProjectItem from '@/components/ProjectItem';
+import CustomCursor from '@/components/CustomCursor';
+
+// Expanded project data with more examples
 const projects = [
   {
     id: '1',
@@ -49,25 +46,44 @@ const projects = [
     thumbnail: 'https://images.unsplash.com/photo-1721322800607-8c38375eef04',
     type: 'image' as const,
     aspectRatio: 'aspect-[4/3]'
+  },
+  {
+    id: '7',
+    title: 'Urban Architecture',
+    thumbnail: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab',
+    type: 'image' as const,
+    aspectRatio: 'aspect-[3/2]'
+  },
+  {
+    id: '8',
+    title: 'Product Design',
+    thumbnail: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30',
+    type: 'image' as const,
+    aspectRatio: 'aspect-[1/1]'
+  },
+  {
+    id: '9',
+    title: 'Fashion Editorial',
+    thumbnail: 'https://images.unsplash.com/photo-1483985988355-763728e1935b',
+    type: 'image' as const,
+    aspectRatio: 'aspect-[2/3]'
+  },
+  {
+    id: '10',
+    title: 'Brand Identity',
+    thumbnail: 'https://images.unsplash.com/photo-1542744173-8659b8e76b1e',
+    type: 'image' as const,
+    aspectRatio: 'aspect-[4/3]'
   }
 ];
 
-// Placeholder slideshow images
-const slideshowImages = [
-  'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
-  'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b',
-  'https://images.unsplash.com/photo-1500673922987-e212871fec22'
-];
-
 const Index: React.FC = () => {
-  const scrollPosition = useRef(0);
   const contentRef = useRef<HTMLDivElement>(null);
-  const [showContactButton, setShowContactButton] = useState(false);
-  const landingRef = useRef<HTMLElement>(null);
-
+  
   // Restore scroll position after navigation
   useEffect(() => {
     const savedScrollPosition = sessionStorage.getItem('scrollPosition');
+    
     if (savedScrollPosition && contentRef.current) {
       setTimeout(() => {
         window.scrollTo(0, parseInt(savedScrollPosition));
@@ -75,57 +91,45 @@ const Index: React.FC = () => {
     }
 
     const handleScroll = () => {
-      scrollPosition.current = window.scrollY;
-      sessionStorage.setItem('scrollPosition', scrollPosition.current.toString());
-      
-      // Show contact button only after scrolling past the landing section
-      if (landingRef.current) {
-        const landingHeight = landingRef.current.offsetHeight;
-        setShowContactButton(window.scrollY > landingHeight - 100);
-      }
+      sessionStorage.setItem('scrollPosition', window.scrollY.toString());
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const scrollToProjects = () => {
-    if (contentRef.current) {
-      contentRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden bg-portfolio-white">
       <CustomCursor />
-      {showContactButton && <FloatingContactButton />}
-
-      {/* Landing Section with Slideshow - Full viewport height and width */}
-      <section 
-        ref={landingRef}
-        className="relative h-screen w-screen flex items-center justify-center"
-      >
-        <Slideshow images={slideshowImages} />
-        <div className="relative z-10 text-center text-portfolio-white p-6 animate-slide-down">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold mb-4 tracking-wider">RAJENDRA DAMAR</h1>
-          <p className="text-xl sm:text-2xl font-light tracking-widest">GRAPHIC DESIGNER</p>
+      
+      {/* Header - Simple and clean */}
+      <header className="w-full py-8 px-6 md:px-12 lg:px-20 fixed top-0 z-40 bg-portfolio-white">
+        <div className="w-full flex justify-between items-center">
+          <div className="text-portfolio-charcoal text-sm md:text-base tracking-wider">
+            GRAPHIC DESIGNER
+          </div>
+          
+          <div className="text-center">
+            <h1 className="font-serif text-xl md:text-2xl lg:text-3xl tracking-wider text-portfolio-charcoal">
+              RAJENDRA DAMAR
+            </h1>
+          </div>
+          
+          <div>
+            <a 
+              href="/contact" 
+              className="text-portfolio-charcoal hover:text-portfolio-darkGray text-sm md:text-base tracking-wider transition-colors"
+            >
+              CONTACT
+            </a>
+          </div>
         </div>
-        
-        {/* Scroll down arrow */}
-        <Button
-          onClick={scrollToProjects}
-          variant="ghost"
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-portfolio-white hover:bg-transparent hover:text-portfolio-gray animate-bounce z-10 rounded-full p-2 border border-portfolio-white"
-        >
-          <ArrowDown className="h-6 w-6" />
-          <span className="sr-only">Scroll Down</span>
-        </Button>
-      </section>
-
-      {/* Projects Gallery Section - No padding to make it seamless */}
-      <section 
+      </header>
+      
+      {/* Projects Gallery Section */}
+      <main 
         ref={contentRef}
-        className="bg-portfolio-white w-full"
+        className="w-full pt-32 pb-16"
       >
         <div className="masonry-grid">
           {projects.map((project) => (
@@ -140,7 +144,7 @@ const Index: React.FC = () => {
             />
           ))}
         </div>
-      </section>
+      </main>
     </div>
   );
 };

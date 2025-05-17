@@ -40,17 +40,26 @@ const CustomCursor: React.FC = () => {
   return (
     <>
       <div 
-        className="custom-cursor" 
+        className="custom-cursor fixed pointer-events-none z-50 mix-blend-difference bg-portfolio-white"
         style={{ 
           left: `${position.x}px`, 
           top: `${position.y}px`,
+          width: '12px',
+          height: '12px',
+          borderRadius: '50%',
+          transform: 'translate(-50%, -50%)',
         }} 
       />
       <div 
-        className="custom-cursor-follower" 
+        className="custom-cursor-follower fixed pointer-events-none z-40 mix-blend-difference"
         style={{ 
           left: `${followerPosition.x}px`, 
           top: `${followerPosition.y}px`,
+          width: '20px',
+          height: '20px',
+          borderRadius: '50%',
+          border: '1px solid #FFFFFF',
+          transform: 'translate(-50%, -50%)',
         }} 
       />
     </>
