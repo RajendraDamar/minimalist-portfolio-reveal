@@ -23,7 +23,7 @@ const Slideshow: React.FC<SlideshowProps> = ({ images, interval = 4000 }) => {
   }, [images.length, interval]);
 
   return (
-    <div className="relative w-full h-screen overflow-hidden">
+    <div className="absolute inset-0 w-full h-full overflow-hidden">
       {images.map((image, index) => (
         <div
           key={index}
@@ -40,7 +40,7 @@ const Slideshow: React.FC<SlideshowProps> = ({ images, interval = 4000 }) => {
           />
         </div>
       ))}
-      <div className="absolute inset-0 bg-portfolio-charcoal opacity-40" />
+      <div className="absolute inset-0 bg-portfolio-charcoal opacity-60" />
     </div>
   );
 };

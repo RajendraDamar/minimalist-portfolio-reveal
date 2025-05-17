@@ -1,9 +1,10 @@
-
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Slideshow from '@/components/Slideshow';
 import ProjectItem from '@/components/ProjectItem';
 import FloatingContactButton from '@/components/FloatingContactButton';
 import CustomCursor from '@/components/CustomCursor';
+import { ArrowDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 // Placeholder data - Replace with your actual projects
 const projects = [
@@ -61,6 +62,8 @@ const slideshowImages = [
 const Index: React.FC = () => {
   const scrollPosition = useRef(0);
   const contentRef = useRef<HTMLDivElement>(null);
+  const [showContactButton, setShowContactButton] = useState(false);
+  const landingRef = useRef<HTMLElement>(null);
 
   // Restore scroll position after navigation
   useEffect(() => {
@@ -74,30 +77,55 @@ const Index: React.FC = () => {
     const handleScroll = () => {
       scrollPosition.current = window.scrollY;
       sessionStorage.setItem('scrollPosition', scrollPosition.current.toString());
+      
+      // Show contact button only after scrolling past the landing section
+      if (landingRef.current) {
+        const landingHeight = landingRef.current.offsetHeight;
+        setShowContactButton(window.scrollY > landingHeight - 100);
+      }
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const scrollToProjects = () => {
+    if (contentRef.current) {
+      contentRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       <CustomCursor />
-      <FloatingContactButton />
+      {showContactButton && <FloatingContactButton />}
 
-      {/* Landing Section with Slideshow - Full viewport height */}
-      <section className="relative h-screen w-full flex items-center justify-center">
+      {/* Landing Section with Slideshow - Full viewport height and width */}
+      <section 
+        ref={landingRef}
+        className="relative h-screen w-screen flex items-center justify-center"
+      >
         <Slideshow images={slideshowImages} />
         <div className="relative z-10 text-center text-portfolio-white p-6 animate-slide-down">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold mb-4 tracking-wider">RAJENDRA DAMAR</h1>
           <p className="text-xl sm:text-2xl font-light tracking-widest">GRAPHIC DESIGNER</p>
         </div>
+        
+        {/* Scroll down arrow */}
+        <Button
+          onClick={scrollToProjects}
+          variant="ghost"
+          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-portfolio-white hover:bg-transparent hover:text-portfolio-gray animate-bounce z-10 rounded-full p-2 border border-portfolio-white"
+        >
+          <ArrowDown className="h-6 w-6" />
+          <span className="sr-only">Scroll Down</span>
+        </Button>
       </section>
 
       {/* Projects Gallery Section - No padding to make it seamless */}
       <section 
         ref={contentRef}
-        className="bg-portfolio-white"
+        className="bg-portfolio-white w-full"
       >
         <div className="masonry-grid">
           {projects.map((project) => (

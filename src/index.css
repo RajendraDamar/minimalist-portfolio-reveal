@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap');
 
@@ -94,6 +95,8 @@
   body {
     @apply bg-portfolio-white text-portfolio-charcoal font-sans cursor-none;
     overflow-x: hidden;
+    margin: 0;
+    padding: 0;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -151,8 +154,21 @@
   }
 }
 
+@screen md {
+  .masonry-grid {
+    column-count: 2;
+  }
+}
+
 @screen lg {
   .masonry-grid {
     column-count: 3;
   }
 }
+
+@screen xl {
+  .masonry-grid {
+    column-count: 3;
+  }
+}
+
