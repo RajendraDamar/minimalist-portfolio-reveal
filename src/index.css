@@ -1,6 +1,5 @@
-
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -121,11 +120,11 @@
 }
 
 .project-item:hover .project-item-overlay {
-  @apply opacity-70;
+  @apply opacity-80;
 }
 
 .project-item-title {
-  @apply text-portfolio-white font-serif text-xl opacity-0 transform translate-y-4 transition-all duration-300;
+  @apply text-portfolio-white font-serif text-xl opacity-0 transform translate-y-2 transition-all duration-300 tracking-wide;
 }
 
 .project-item:hover .project-item-title {
@@ -143,7 +142,7 @@
 .masonry-grid {
   @apply w-full;
   column-count: 1;
-  column-gap: 1rem;
+  column-gap: 0;
 }
 
 @screen sm {

@@ -22,7 +22,7 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
   return (
     <Link 
       to={`/project/${id}`} 
-      className="project-item block mb-4 break-inside-avoid"
+      className="project-item block mb-0 break-inside-avoid"
       style={{ display: 'block' }}
     >
       <div className={`relative ${aspectRatio} ${background} overflow-hidden`}>

@@ -69,33 +69,37 @@ const ProjectPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-portfolio-white">
+    <div className="min-h-screen bg-portfolio-white overflow-hidden">
       <CustomCursor />
       <FloatingContactButton />
       
-      <div className="container mx-auto px-6 py-16">
+      <div className="max-w-screen-xl mx-auto px-6 py-16 md:py-24">
         <Link to="/" className="inline-flex items-center text-portfolio-charcoal hover:text-portfolio-darkGray mb-12 transition-colors">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Projects
         </Link>
         
-        <div className="w-full h-[60vh] relative mb-12">
-          <img 
-            src={project.image} 
-            alt={project.title} 
-            className="w-full h-full object-cover"
-          />
-        </div>
-        
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-serif font-bold text-portfolio-charcoal mb-4">{project.title}</h1>
-          <p className="text-portfolio-darkGray mb-8">{project.year}</p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-16">
+          {/* Left column - Image */}
+          <div className="w-full h-[400px] md:h-[600px] lg:h-[80vh]">
+            <img 
+              src={project.image} 
+              alt={project.title} 
+              className="w-full h-full object-cover"
+            />
+          </div>
           
-          <p className="text-lg text-portfolio-charcoal mb-8">{project.description}</p>
-          
-          <div className="border-t border-portfolio-lightGray pt-8 mt-8">
-            <h2 className="text-2xl font-serif font-medium text-portfolio-charcoal mb-4">Project Details</h2>
-            <p className="text-portfolio-darkGray">{project.details}</p>
+          {/* Right column - Project details */}
+          <div className="flex flex-col justify-center">
+            <h1 className="text-3xl md:text-4xl font-serif font-bold text-portfolio-charcoal mb-4 tracking-wide">{project.title.toUpperCase()}</h1>
+            <p className="text-portfolio-darkGray mb-8">{project.year}</p>
+            
+            <p className="text-lg text-portfolio-darkGray mb-8">{project.description}</p>
+            
+            <div className="border-t border-portfolio-lightGray pt-8">
+              <h2 className="text-xl font-serif font-medium text-portfolio-charcoal mb-4">Project Details</h2>
+              <p className="text-portfolio-darkGray">{project.details}</p>
+            </div>
           </div>
         </div>
       </div>

@@ -81,23 +81,23 @@ const Index: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen relative overflow-hidden">
       <CustomCursor />
       <FloatingContactButton />
 
-      {/* Landing Section with Slideshow */}
+      {/* Landing Section with Slideshow - Full viewport height */}
       <section className="relative h-screen w-full flex items-center justify-center">
         <Slideshow images={slideshowImages} />
         <div className="relative z-10 text-center text-portfolio-white p-6 animate-slide-down">
-          <h1 className="text-6xl font-serif font-bold mb-4">John Doe</h1>
-          <p className="text-2xl font-light">Creative Designer & Developer</p>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold mb-4 tracking-wider">RAJENDRA DAMAR</h1>
+          <p className="text-xl sm:text-2xl font-light tracking-widest">GRAPHIC DESIGNER</p>
         </div>
       </section>
 
-      {/* Projects Gallery Section */}
+      {/* Projects Gallery Section - No padding to make it seamless */}
       <section 
         ref={contentRef}
-        className="py-20 px-6 md:px-12 bg-portfolio-white"
+        className="bg-portfolio-white"
       >
         <div className="masonry-grid">
           {projects.map((project) => (
