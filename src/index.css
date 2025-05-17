@@ -1,3 +1,7 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -35,19 +39,12 @@
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
@@ -96,6 +93,67 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-portfolio-white text-portfolio-charcoal font-sans cursor-none;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
+.custom-cursor {
+  @apply pointer-events-none fixed z-50 w-6 h-6 rounded-full mix-blend-difference bg-portfolio-white transition-transform duration-150 ease-out;
+  transform: translate(-50%, -50%);
+}
+
+.custom-cursor-follower {
+  @apply pointer-events-none fixed z-40 w-10 h-10 rounded-full border border-portfolio-white mix-blend-difference transition-transform duration-300 ease-out;
+  transform: translate(-50%, -50%);
+}
+
+.project-item {
+  @apply relative cursor-none overflow-hidden;
+}
+
+.project-item-overlay {
+  @apply absolute inset-0 bg-portfolio-charcoal opacity-0 transition-opacity duration-300 flex items-center justify-center;
+}
+
+.project-item:hover .project-item-overlay {
+  @apply opacity-70;
+}
+
+.project-item-title {
+  @apply text-portfolio-white font-serif text-xl opacity-0 transform translate-y-4 transition-all duration-300;
+}
+
+.project-item:hover .project-item-title {
+  @apply opacity-100 translate-y-0;
+}
+
+.floating-button {
+  @apply fixed left-6 bottom-6 z-30 transition-transform duration-300 ease-out;
+}
+
+.floating-button:hover {
+  @apply transform scale-110;
+}
+
+.masonry-grid {
+  @apply w-full;
+  column-count: 1;
+  column-gap: 1rem;
+}
+
+@screen sm {
+  .masonry-grid {
+    column-count: 2;
+  }
+}
+
+@screen lg {
+  .masonry-grid {
+    column-count: 3;
   }
 }
