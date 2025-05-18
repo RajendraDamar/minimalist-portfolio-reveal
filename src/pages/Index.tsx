@@ -3,6 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import ProjectItem from '@/components/ProjectItem';
 import CustomCursor from '@/components/CustomCursor';
 import FloatingContactButton from '@/components/FloatingContactButton';
+import SearchBar from '@/components/SearchBar';
+import { Link } from 'react-router-dom';
 
 // Expanded project data with more examples
 const projects = [
@@ -116,6 +118,7 @@ const projects = [
 const Index: React.FC = () => {
   const contentRef = useRef<HTMLDivElement>(null);
   const [scrolled, setScrolled] = useState(false);
+  const [headerCompact, setHeaderCompact] = useState(false);
   
   // Restore scroll position after navigation
   useEffect(() => {
@@ -130,6 +133,7 @@ const Index: React.FC = () => {
     const handleScroll = () => {
       sessionStorage.setItem('scrollPosition', window.scrollY.toString());
       setScrolled(window.scrollY > 50);
+      setHeaderCompact(window.scrollY > 100);
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -140,32 +144,67 @@ const Index: React.FC = () => {
     <div className="min-h-screen relative overflow-hidden bg-portfolio-white">
       <CustomCursor />
       
-      {/* Header - With name properly centered */}
-      <header className="w-full py-8 px-6 md:px-12 lg:px-20 fixed top-0 z-40 bg-portfolio-white">
-        <div className="w-full flex justify-between items-center">
-          <div className="text-portfolio-charcoal text-sm md:text-base tracking-wider w-1/3 text-left">
-            GRAPHIC DESIGNER
-          </div>
-          
-          <div className="text-center w-1/3">
-            <h1 className="font-serif text-xl md:text-2xl lg:text-3xl tracking-wider text-portfolio-charcoal">
-              RAJENDRA DAMAR
-            </h1>
-          </div>
-          
-          <div className="w-1/3 text-right">
-            <a 
-              href="/contact" 
-              className="text-portfolio-charcoal hover:text-portfolio-darkGray text-sm md:text-base tracking-wider transition-colors"
+      {/* Header with dynamic transformation */}
+      <header 
+        className={`fixed top-0 w-full z-40 transition-all duration-500 ${
+          headerCompact 
+            ? 'py-3 bg-transparent backdrop-blur-sm' 
+            : 'py-8 bg-portfolio-white'
+        }`}
+      >
+        <div className={`mx-auto px-6 transition-all duration-500 ${
+          headerCompact ? 'max-w-full' : 'max-w-5xl'
+        }`}>
+          <div className={`flex items-center transition-all duration-500 ${
+            headerCompact 
+              ? 'justify-start gap-6' 
+              : 'justify-between'
+          }`}>
+            {/* Name and title section */}
+            <div className={`transition-all duration-500 ${
+              headerCompact ? 'flex items-center gap-4' : ''
+            }`}>
+              <h1 className={`font-display font-semibold tracking-wider transition-all duration-500 ${
+                headerCompact 
+                  ? 'text-lg text-portfolio-white mix-blend-difference' 
+                  : 'text-xl md:text-2xl lg:text-3xl text-portfolio-charcoal'
+              }`}>
+                RAJENDRA DAMAR
+              </h1>
+              
+              <div className={`text-sm md:text-base tracking-wider transition-all duration-500 ${
+                headerCompact 
+                  ? 'text-portfolio-white mix-blend-difference' 
+                  : 'text-portfolio-charcoal mt-1'
+              }`}>
+                GRAPHIC DESIGNER
+              </div>
+            </div>
+            
+            {/* Search bar - only show when not compact */}
+            <div className={`transition-all duration-500 ${
+              headerCompact ? 'hidden' : 'block'
+            }`}>
+              <SearchBar projects={projects} />
+            </div>
+            
+            {/* Contact link */}
+            <Link 
+              to="/contact" 
+              className={`transition-all duration-500 ${
+                headerCompact 
+                  ? 'text-portfolio-white mix-blend-difference text-sm py-1 px-4 border border-white/20 rounded-full hover:bg-white/10' 
+                  : 'text-portfolio-charcoal hover:text-portfolio-darkGray text-sm md:text-base tracking-wider'
+              }`}
             >
               CONTACT
-            </a>
+            </Link>
           </div>
         </div>
         
-        {/* Purple flare element */}
-        <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-dark-orchid opacity-15 blur-3xl -z-10 animate-pulse-slow"></div>
-        <div className="absolute bottom-0 left-1/4 w-96 h-96 rounded-full bg-dark-orchid opacity-10 blur-3xl -z-10"></div>
+        {/* Enhanced purple flare elements */}
+        <div className="absolute top-0 right-1/4 w-80 h-80 rounded-full bg-dark-orchid opacity-25 blur-3xl -z-10 animate-pulse-slow"></div>
+        <div className="absolute -bottom-20 left-1/3 w-96 h-96 rounded-full bg-dark-orchid opacity-20 blur-3xl -z-10"></div>
       </header>
       
       {/* Projects Gallery Section */}
