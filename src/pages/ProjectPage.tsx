@@ -3,7 +3,6 @@ import React, { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import CustomCursor from '@/components/CustomCursor';
-import FloatingContactButton from '@/components/FloatingContactButton';
 
 // Placeholder project data - Replace with your actual projects
 const projectsData = {
@@ -71,7 +70,6 @@ const ProjectPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-portfolio-white overflow-hidden">
       <CustomCursor />
-      <FloatingContactButton />
       
       <div className="max-w-screen-xl mx-auto px-6 py-16 md:py-24">
         <Link to="/" className="inline-flex items-center text-portfolio-charcoal hover:text-portfolio-darkGray mb-12 transition-colors">
