@@ -65,10 +65,10 @@ export default {
 				},
 				portfolio: {
 					white: '#FFFFFF',
-					lightGray: '#F5F5F5',
-					gray: '#CCCCCC',
-					darkGray: '#666666',
-					charcoal: '#333333',
+					lightGray: '#2A2A2A',
+					gray: '#4A4A4A',
+					darkGray: '#AAAAAA',
+					charcoal: '#121212',
 				},
 				'dark-orchid': '#9932CC',
 			},
@@ -110,10 +110,6 @@ export default {
 					'0%': { transform: 'translateY(-10px)', opacity: '0' },
 					'100%': { transform: 'translateY(0)', opacity: '1' }
 				},
-				'pulse-slow': {
-					'0%, 100%': { opacity: '0.15' },
-					'50%': { opacity: '0.3' }
-				},
 				'float': {
 					'0%, 100%': { transform: 'translateY(0)' },
 					'50%': { transform: 'translateY(-5px)' }
@@ -130,15 +126,16 @@ export default {
 				'fade-out': 'fade-out 0.5s ease-out forwards',
 				'slide-up': 'slide-up 0.5s ease-out forwards',
 				'slide-down': 'slide-down 0.5s ease-out forwards',
-				'pulse-slow': 'pulse-slow 5s ease-in-out infinite',
 				'float': 'float 3s ease-in-out infinite',
 				'glow': 'glow 2s ease-in-out infinite',
 			},
 			fontFamily: {
-				'sans': ['Montserrat', 'Work Sans', 'Outfit', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-				'serif': ['Cormorant Garamond', 'Outfit', 'DM Serif Display', 'Georgia', 'serif'],
+				'sans': ['Syne', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+				'serif': ['Unbounded', 'Georgia', 'serif'],
 				'mono': ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'monospace'],
-				'display': ['Playfair Display', 'serif'],
+				'display': ['Unbounded', 'serif'],
+				'syne': ['Syne', 'sans-serif'],
+				'unbounded': ['Unbounded', 'sans-serif'],
 			}
 		}
 	},

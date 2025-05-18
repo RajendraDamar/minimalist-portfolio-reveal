@@ -2,9 +2,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ProjectItem from '@/components/ProjectItem';
 import CustomCursor from '@/components/CustomCursor';
-import FloatingContactButton from '@/components/FloatingContactButton';
 import SearchBar from '@/components/SearchBar';
 import { Link } from 'react-router-dom';
+import { Search, Mail } from 'lucide-react';
 
 // Expanded project data with more examples
 const projects = [
@@ -119,6 +119,7 @@ const Index: React.FC = () => {
   const contentRef = useRef<HTMLDivElement>(null);
   const [scrolled, setScrolled] = useState(false);
   const [headerCompact, setHeaderCompact] = useState(false);
+  const [showSearchModal, setShowSearchModal] = useState(false);
   
   // Restore scroll position after navigation
   useEffect(() => {
@@ -141,7 +142,7 @@ const Index: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-portfolio-white">
+    <div className="min-h-screen relative overflow-hidden bg-portfolio-charcoal">
       <CustomCursor />
       
       {/* Header with dynamic transformation */}
@@ -149,62 +150,96 @@ const Index: React.FC = () => {
         className={`fixed top-0 w-full z-40 transition-all duration-500 ${
           headerCompact 
             ? 'py-3 bg-transparent backdrop-blur-sm' 
-            : 'py-8 bg-portfolio-white'
+            : 'py-6 bg-portfolio-charcoal'
         }`}
       >
         <div className={`mx-auto px-6 transition-all duration-500 ${
-          headerCompact ? 'max-w-full' : 'max-w-5xl'
+          headerCompact ? 'max-w-5xl' : 'max-w-4xl'
         }`}>
           <div className={`flex items-center transition-all duration-500 ${
             headerCompact 
-              ? 'justify-start gap-6' 
+              ? 'justify-between' 
               : 'justify-between'
           }`}>
-            {/* Name and title section */}
+            {/* Title - on the left initially, stacks under name after scroll */}
             <div className={`transition-all duration-500 ${
-              headerCompact ? 'flex items-center gap-4' : ''
+              headerCompact 
+                ? 'order-1' 
+                : 'order-1 w-1/4'
             }`}>
-              <h1 className={`font-display font-semibold tracking-wider transition-all duration-500 ${
+              <div className={`text-sm md:text-base font-syne tracking-wider transition-all duration-500 ${
                 headerCompact 
-                  ? 'text-lg text-portfolio-white mix-blend-difference' 
-                  : 'text-xl md:text-2xl lg:text-3xl text-portfolio-charcoal'
-              }`}>
-                RAJENDRA DAMAR
-              </h1>
-              
-              <div className={`text-sm md:text-base tracking-wider transition-all duration-500 ${
-                headerCompact 
-                  ? 'text-portfolio-white mix-blend-difference' 
-                  : 'text-portfolio-charcoal mt-1'
+                  ? 'text-portfolio-white opacity-0 absolute -z-10' 
+                  : 'text-portfolio-white'
               }`}>
                 GRAPHIC DESIGNER
               </div>
             </div>
             
-            {/* Search bar - only show when not compact */}
+            {/* Name - centered initially, moves to left after scroll */}
             <div className={`transition-all duration-500 ${
-              headerCompact ? 'hidden' : 'block'
+              headerCompact 
+                ? 'order-1 flex flex-col items-start justify-center' 
+                : 'order-2 w-2/4 text-center'
             }`}>
-              <SearchBar projects={projects} />
+              <h1 className={`font-unbounded font-semibold tracking-wider transition-all duration-500 ${
+                headerCompact 
+                  ? 'text-lg text-portfolio-white mix-blend-difference' 
+                  : 'text-xl md:text-2xl lg:text-3xl text-portfolio-white'
+              }`}>
+                RAJENDRA DAMAR
+              </h1>
+              
+              {headerCompact && (
+                <div className="text-xs text-portfolio-white mix-blend-difference font-syne tracking-wider mt-0.5">
+                  GRAPHIC DESIGNER
+                </div>
+              )}
             </div>
             
-            {/* Contact link */}
-            <Link 
-              to="/contact" 
-              className={`transition-all duration-500 ${
-                headerCompact 
-                  ? 'text-portfolio-white mix-blend-difference text-sm py-1 px-4 border border-white/20 rounded-full hover:bg-white/10' 
-                  : 'text-portfolio-charcoal hover:text-portfolio-darkGray text-sm md:text-base tracking-wider'
-              }`}
-            >
-              CONTACT
-            </Link>
+            {/* Navigation buttons - on the right */}
+            <div className={`flex items-center gap-4 transition-all duration-500 ${
+              headerCompact 
+                ? 'order-2' 
+                : 'order-3 w-1/4 justify-end'
+            }`}>
+              {/* Search button */}
+              <button 
+                onClick={() => setShowSearchModal(!showSearchModal)} 
+                className={`transition-all duration-500 flex items-center ${
+                  headerCompact 
+                    ? 'text-portfolio-white mix-blend-difference px-4 py-2 text-sm' 
+                    : 'text-portfolio-white'
+                }`}
+              >
+                <Search size={headerCompact ? 18 : 16} />
+                {headerCompact && <span className="ml-2">SEARCH</span>}
+              </button>
+              
+              {/* Contact button */}
+              <Link 
+                to="/contact" 
+                className={`transition-all duration-500 flex items-center ${
+                  headerCompact 
+                    ? 'text-portfolio-white mix-blend-difference px-4 py-2 text-sm' 
+                    : 'text-portfolio-white'
+                }`}
+              >
+                <Mail size={headerCompact ? 18 : 16} />
+                {headerCompact && <span className="ml-2">CONTACT</span>}
+              </Link>
+            </div>
           </div>
         </div>
         
-        {/* Enhanced purple flare elements */}
-        <div className="absolute top-0 right-1/4 w-80 h-80 rounded-full bg-dark-orchid opacity-25 blur-3xl -z-10 animate-pulse-slow"></div>
-        <div className="absolute -bottom-20 left-1/3 w-96 h-96 rounded-full bg-dark-orchid opacity-20 blur-3xl -z-10"></div>
+        {/* Search modal */}
+        {showSearchModal && (
+          <div className="absolute top-full left-0 w-full bg-portfolio-charcoal p-4 shadow-lg">
+            <div className="max-w-2xl mx-auto">
+              <SearchBar projects={projects} />
+            </div>
+          </div>
+        )}
       </header>
       
       {/* Projects Gallery Section */}
@@ -226,8 +261,6 @@ const Index: React.FC = () => {
           ))}
         </div>
       </main>
-      
-      {scrolled && <FloatingContactButton />}
     </div>
   );
 };

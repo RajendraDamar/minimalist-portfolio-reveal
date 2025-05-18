@@ -17,18 +17,14 @@ const CustomCursor: React.FC = () => {
       const y = parseFloat(document.documentElement.style.getPropertyValue('--cursor-y') || '0');
       
       // Update follower position with LERP
-      const followerRect = followerRef.current.getBoundingClientRect();
       const followerX = parseFloat(followerRef.current.style.left || '0');
       const followerY = parseFloat(followerRef.current.style.top || '0');
       
       const newX = followerX + (x - followerX) * 0.15;
       const newY = followerY + (y - followerY) * 0.15;
       
-      // Only update DOM when there's significant change (optimization)
-      if (Math.abs(newX - followerX) > 0.1 || Math.abs(newY - followerY) > 0.1) {
-        followerRef.current.style.left = `${newX}px`;
-        followerRef.current.style.top = `${newY}px`;
-      }
+      followerRef.current.style.left = `${newX}px`;
+      followerRef.current.style.top = `${newY}px`;
     }
     
     previousTimeRef.current = time;
@@ -57,6 +53,14 @@ const CustomCursor: React.FC = () => {
     
     // Start animation loop
     requestRef.current = requestAnimationFrame(animate);
+    
+    // Set initial positions
+    if (followerRef.current) {
+      const x = parseFloat(document.documentElement.style.getPropertyValue('--cursor-x') || '0');
+      const y = parseFloat(document.documentElement.style.getPropertyValue('--cursor-y') || '0');
+      followerRef.current.style.left = `${x}px`;
+      followerRef.current.style.top = `${y}px`;
+    }
 
     return () => {
       document.removeEventListener('mousemove', updateCursorPosition);
@@ -75,13 +79,11 @@ const CustomCursor: React.FC = () => {
     <>
       <div 
         ref={cursorRef}
-        className="custom-cursor fixed pointer-events-none z-50 mix-blend-difference"
-        style={{ transform: 'translate(-50%, -50%)' }} 
+        className="custom-cursor fixed pointer-events-none z-50"
       />
       <div 
         ref={followerRef}
-        className="custom-cursor-follower fixed pointer-events-none z-40 mix-blend-difference"
-        style={{ transform: 'translate(-50%, -50%)' }}
+        className="custom-cursor-follower fixed pointer-events-none z-40"
       />
     </>
   );

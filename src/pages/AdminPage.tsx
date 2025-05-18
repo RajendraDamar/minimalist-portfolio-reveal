@@ -4,7 +4,7 @@ import { useParams, Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import { Form, FormField, FormItem, FormLabel, FormControl } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
 import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -44,7 +44,6 @@ const AdminPage: React.FC = () => {
   });
   
   const onSubmit = async (data: ProjectFormData) => {
-    // In a real implementation, this would upload to Supabase
     console.log('Project data to be uploaded:', data);
     
     toast({
@@ -52,7 +51,6 @@ const AdminPage: React.FC = () => {
       description: "Your project has been saved and will be connected to Supabase later.",
     });
     
-    // Reset form after submit
     form.reset();
     setMediaPreview(null);
     setMediaType(null);
@@ -62,10 +60,8 @@ const AdminPage: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     
-    // Update form value
     form.setValue('media', file);
     
-    // Create preview
     const reader = new FileReader();
     reader.onload = () => {
       setMediaPreview(reader.result as string);
@@ -80,29 +76,27 @@ const AdminPage: React.FC = () => {
   }
   
   return (
-    <div className="min-h-screen bg-portfolio-white p-8">
-      <div className="max-w-2xl mx-auto">
-        <Link to="/" className="inline-flex items-center text-portfolio-charcoal hover:text-portfolio-darkGray mb-8">
+    <div className="min-h-screen bg-portfolio-charcoal p-8">
+      <div className="max-w-xl mx-auto">
+        <Link to="/" className="inline-flex items-center text-portfolio-white hover:text-portfolio-darkGray mb-8">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Home
         </Link>
         
-        <div className="bg-portfolio-lightGray p-8 rounded-lg">
-          <h1 className="text-3xl font-display font-medium mb-6">Admin Dashboard</h1>
-          <p className="mb-8 text-portfolio-darkGray">Add a new project to your portfolio</p>
+        <div className="bg-portfolio-lightGray p-6 rounded">
+          <h1 className="text-2xl font-unbounded font-medium mb-6 text-portfolio-white">Admin</h1>
           
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Project Title</FormLabel>
+                    <FormLabel className="text-portfolio-white">Title</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter project title" {...field} />
+                      <Input placeholder="Project title" {...field} className="bg-portfolio-charcoal text-portfolio-white border-portfolio-gray" />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -112,30 +106,28 @@ const AdminPage: React.FC = () => {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Project Description</FormLabel>
+                    <FormLabel className="text-portfolio-white">Description</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Enter project description" className="h-32" {...field} />
+                      <Textarea placeholder="Project description" className="h-24 bg-portfolio-charcoal text-portfolio-white border-portfolio-gray" {...field} />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
               
               <div className="space-y-2">
-                <FormLabel>Upload Media</FormLabel>
+                <FormLabel className="text-portfolio-white">Media</FormLabel>
                 <Input 
                   type="file"
                   accept="image/png,image/jpeg,image/gif,video/mp4"
                   onChange={handleFileChange}
-                  className="file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-dark-orchid/10 file:text-dark-orchid hover:file:bg-dark-orchid/20"
+                  className="file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-portfolio-gray file:text-portfolio-white hover:file:bg-portfolio-gray/80 bg-portfolio-charcoal text-portfolio-white border-portfolio-gray"
                 />
                 {mediaPreview && (
                   <div className="mt-4 border border-portfolio-gray p-2 rounded">
-                    <p className="text-sm text-portfolio-darkGray mb-2">Preview:</p>
                     {mediaType === 'video' ? (
-                      <video src={mediaPreview} controls className="max-h-60 mx-auto" />
+                      <video src={mediaPreview} controls className="max-h-40 mx-auto" />
                     ) : (
-                      <img src={mediaPreview} alt="Preview" className="max-h-60 mx-auto" />
+                      <img src={mediaPreview} alt="Preview" className="max-h-40 mx-auto" />
                     )}
                   </div>
                 )}
@@ -143,21 +135,14 @@ const AdminPage: React.FC = () => {
               
               <Button 
                 type="submit" 
-                className="w-full bg-dark-orchid hover:bg-dark-orchid/80 text-white"
+                className="w-full bg-portfolio-gray hover:bg-portfolio-gray/80 text-portfolio-white"
               >
-                Save Project
+                Save
               </Button>
             </form>
           </Form>
         </div>
-        
-        <div className="mt-8 text-center text-sm text-portfolio-darkGray">
-          <p>This form will be connected to Supabase for data storage in a future update.</p>
-        </div>
       </div>
-      
-      {/* Purple flare element */}
-      <div className="fixed -bottom-20 -right-20 w-96 h-96 rounded-full bg-dark-orchid opacity-20 blur-3xl -z-10"></div>
     </div>
   );
 };

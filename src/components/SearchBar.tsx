@@ -63,16 +63,16 @@ const SearchBar: React.FC<SearchBarProps> = ({ projects }) => {
   };
   
   return (
-    <div className="relative max-w-xs md:max-w-sm" ref={searchRef}>
+    <div className="relative w-full" ref={searchRef}>
       <div className="relative flex items-center">
-        <Search className="absolute left-3 h-4 w-4 text-portfolio-darkGray" />
+        <Search className="absolute left-3 h-4 w-4 text-portfolio-gray" />
         <input
           type="text"
           value={query}
           onChange={(e) => handleSearch(e.target.value)}
           onFocus={() => setIsOpen(true)}
           placeholder="Search projects..."
-          className="pl-10 pr-4 py-2 w-full bg-portfolio-lightGray rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-dark-orchid transition-all"
+          className="pl-10 pr-4 py-2 w-full bg-portfolio-lightGray rounded-full text-sm text-portfolio-white focus:outline-none focus:ring-1 focus:ring-portfolio-gray transition-all"
         />
         {query && (
           <button
@@ -83,17 +83,17 @@ const SearchBar: React.FC<SearchBarProps> = ({ projects }) => {
             }}
             className="absolute right-3"
           >
-            <X className="h-4 w-4 text-portfolio-darkGray" />
+            <X className="h-4 w-4 text-portfolio-gray" />
           </button>
         )}
       </div>
       
       {isOpen && (query || showAdminButton) && (
-        <div className="absolute mt-2 w-full bg-white rounded-md shadow-lg py-2 z-50 animate-fade-in">
+        <div className="absolute mt-2 w-full bg-portfolio-lightGray rounded-md shadow-lg py-2 z-50 animate-fade-in">
           {showAdminButton ? (
             <div className="px-4 py-3">
               <Link to={generateAdminUrl()}>
-                <Button className="w-full bg-dark-orchid hover:bg-dark-orchid/80 text-white">
+                <Button className="w-full bg-dark-orchid hover:bg-dark-orchid/80 text-portfolio-white">
                   Login as Admin
                 </Button>
               </Link>
@@ -103,7 +103,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ projects }) => {
               <Link
                 key={project.id}
                 to={`/project/${project.id}`}
-                className="block px-4 py-2 hover:bg-portfolio-lightGray"
+                className="block px-4 py-2 hover:bg-portfolio-gray/20 text-portfolio-white"
                 onClick={() => setIsOpen(false)}
               >
                 {project.title}
