@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import ProjectItem from '@/components/ProjectItem';
 import CustomCursor from '@/components/CustomCursor';
@@ -160,18 +161,34 @@ const Index: React.FC = () => {
       <header 
         className={`fixed top-0 w-full z-40 transition-all duration-500 ${
           scrolled 
-            ? 'py-3 bg-gradient-to-b from-portfolio-charcoal/70 to-transparent backdrop-blur-sm' 
-            : 'py-4 bg-transparent'
+            ? 'py-3' 
+            : 'py-4'
         }`}
       >
-        <div className="w-full px-6 mx-auto">
-          <div className={`flex items-center transition-all duration-500 ${
-            scrolled ? 'justify-between' : 'justify-between'
-          }`}>
+        <div 
+          className={`absolute inset-0 transition-opacity duration-500 ${
+            scrolled ? 'opacity-100' : 'opacity-0'
+          }`}
+        >
+          <div className="absolute inset-0 bg-gradient-to-b from-portfolio-charcoal/80 to-transparent" style={{ backdropFilter: 'blur(8px)' }}></div>
+        </div>
+        
+        <div className="container max-w-screen-xl mx-auto px-6">
+          <div className="relative flex items-center justify-between">
             {/* Left: Title (normal) or Name+Title (scrolled) */}
             <div className={`transition-all duration-500 flex ${
               scrolled ? 'flex-col items-start' : 'items-center'
             }`}>
+              {/* Name - Centered initially, moves to left when scrolled */}
+              {scrolled && (
+                <h1 
+                  className="order-1 font-unbounded font-semibold text-lg tracking-wider text-portfolio-white cursor-pointer transition-all duration-500"
+                  onClick={scrollToTop}
+                >
+                  RAJENDRA DAMAR
+                </h1>
+              )}
+              
               {/* Title - visible on left initially, under name when scrolled */}
               <div 
                 className={`text-sm font-syne tracking-wider transition-all duration-500 ${
@@ -183,33 +200,25 @@ const Index: React.FC = () => {
               >
                 GRAPHIC DESIGNER
               </div>
-              
-              {/* Name - centered initially, moves to left after scroll */}
-              {scrolled && (
-                <h1 
-                  className="order-1 font-unbounded font-semibold text-lg tracking-wider text-portfolio-white cursor-pointer"
-                  onClick={scrollToTop}
-                >
-                  RAJENDRA DAMAR
-                </h1>
-              )}
             </div>
             
             {/* Middle: Name (normal state only) */}
             {!scrolled && (
-              <div className="flex-1 text-center">
-                <h1 className="font-unbounded font-semibold text-xl md:text-2xl lg:text-3xl text-portfolio-white">
+              <div className="absolute left-1/2 transform -translate-x-1/2 text-center">
+                <h1 className="font-unbounded font-semibold text-xl md:text-2xl lg:text-3xl text-portfolio-white transition-all">
                   RAJENDRA DAMAR
                 </h1>
               </div>
             )}
             
             {/* Right: Search and Contact buttons */}
-            <div className="flex items-center gap-4">
+            <div className={`flex items-center gap-4 transition-all duration-500 ${
+              scrolled ? 'justify-end' : ''
+            }`}>
               {/* Search bar/button */}
               {scrolled ? (
-                <div className="w-60 transition-all duration-300">
-                  <SearchBar projects={projects} />
+                <div className="w-60 transition-all duration-500 absolute left-1/2 transform -translate-x-1/2">
+                  <SearchBar projects={projects} expanded={true} />
                 </div>
               ) : (
                 showSearchInput ? (
@@ -230,7 +239,7 @@ const Index: React.FC = () => {
               {/* Contact button */}
               <Link 
                 to="/contact" 
-                className={`transition-all duration-300 flex items-center rounded-full ${
+                className={`transition-all duration-500 flex items-center rounded-full ${
                   scrolled 
                     ? 'bg-portfolio-lightGray/20 px-4 py-2 text-sm' 
                     : 'bg-portfolio-lightGray/10 p-2'

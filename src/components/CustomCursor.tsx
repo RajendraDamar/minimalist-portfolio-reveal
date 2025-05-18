@@ -18,7 +18,7 @@ const CustomCursor: React.FC = () => {
       followerPositionRef.current.x += (positionRef.current.x - followerPositionRef.current.x) * 0.1;
       followerPositionRef.current.y += (positionRef.current.y - followerPositionRef.current.y) * 0.1;
       
-      // Only update DOM when needed
+      // Update DOM with transform3d for better performance
       followerRef.current.style.transform = `translate3d(${followerPositionRef.current.x}px, ${followerPositionRef.current.y}px, 0)`;
     }
     
@@ -27,27 +27,33 @@ const CustomCursor: React.FC = () => {
   };
   
   useEffect(() => {
+    // Check if we're in a browser environment
+    if (typeof window === 'undefined') return;
+    
     const updateCursorPosition = (e: MouseEvent) => {
-      // Store position in ref to avoid re-renders
+      // Store mouse position in ref to avoid re-renders
       positionRef.current = { x: e.clientX, y: e.clientY };
       
-      // Update main cursor directly without animation
+      // Update main cursor directly for immediate response
       if (cursorRef.current) {
         cursorRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
       }
+      
+      // Set visibility on first mouse movement
+      if (!isVisible) setIsVisible(true);
     };
 
     const handleMouseEnter = () => setIsVisible(true);
     const handleMouseLeave = () => setIsVisible(false);
 
+    // Initialize positions to prevent cursor jumping on load
+    positionRef.current = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    followerPositionRef.current = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    
+    // Add event listeners
     document.addEventListener('mousemove', updateCursorPosition);
     document.addEventListener('mouseenter', handleMouseEnter);
     document.addEventListener('mouseleave', handleMouseLeave);
-    
-    // Initialize follower position
-    if (followerRef.current) {
-      followerPositionRef.current = { x: 0, y: 0 };
-    }
     
     // Start animation loop
     requestRef.current = requestAnimationFrame(animate);
@@ -61,17 +67,17 @@ const CustomCursor: React.FC = () => {
         cancelAnimationFrame(requestRef.current);
       }
     };
-  }, []);
+  }, [isVisible]);
 
   return (
     <>
       <div 
         ref={cursorRef}
-        className="custom-cursor fixed pointer-events-none z-50"
+        className={`custom-cursor fixed pointer-events-none z-50 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
       />
       <div 
         ref={followerRef}
-        className="custom-cursor-follower fixed pointer-events-none z-40"
+        className={`custom-cursor-follower fixed pointer-events-none z-40 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
       />
     </>
   );

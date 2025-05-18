@@ -71,7 +71,7 @@ const ProjectPage: React.FC = () => {
     <div className="min-h-screen bg-portfolio-charcoal overflow-hidden">
       <CustomCursor />
       
-      <div className="max-w-4xl mx-auto px-6 py-16 md:py-24">
+      <div className="max-w-5xl mx-auto px-6 py-16 md:py-24 border-x border-portfolio-lightGray/10">
         <Link to="/" className="inline-flex items-center text-portfolio-white hover:text-portfolio-darkGray mb-12 transition-colors">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Projects

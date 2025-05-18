@@ -1,18 +1,22 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Search, X } from 'lucide-react';
 
 interface SearchBarProps {
   projects: { id: string; title: string; thumbnail?: string }[];
+  expanded?: boolean;
+  className?: string;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ projects }) => {
+const SearchBar: React.FC<SearchBarProps> = ({ projects, expanded = false, className = '' }) => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<{ id: string; title: string; thumbnail?: string }[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [showAdminButton, setShowAdminButton] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
   
   // Search function that matches from the beginning of words
   const handleSearch = (searchTerm: string) => {
@@ -41,6 +45,20 @@ const SearchBar: React.FC<SearchBarProps> = ({ projects }) => {
     
     setResults(filtered);
   };
+
+  // Navigate to project when selected
+  const navigateToProject = (projectId: string) => {
+    navigate(`/project/${projectId}`);
+    setIsOpen(false);
+    setQuery('');
+  };
+  
+  // Focus input when expanded
+  useEffect(() => {
+    if (expanded && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [expanded]);
   
   // Close search results when clicking outside
   useEffect(() => {
@@ -62,10 +80,11 @@ const SearchBar: React.FC<SearchBarProps> = ({ projects }) => {
   };
   
   return (
-    <div className="relative w-full" ref={searchRef}>
-      <div className="relative flex items-center">
+    <div className={`relative ${className}`} ref={searchRef}>
+      <div className="relative flex items-center w-full">
         <Search className="absolute left-3 h-4 w-4 text-portfolio-gray" />
         <input
+          ref={inputRef}
           type="text"
           value={query}
           onChange={(e) => handleSearch(e.target.value)}
@@ -100,11 +119,10 @@ const SearchBar: React.FC<SearchBarProps> = ({ projects }) => {
             </div>
           ) : results.length > 0 ? (
             results.map(project => (
-              <Link
+              <div
                 key={project.id}
-                to={`/project/${project.id}`}
-                className="block px-4 py-2 hover:bg-portfolio-gray/20 text-portfolio-white"
-                onClick={() => setIsOpen(false)}
+                onClick={() => navigateToProject(project.id)}
+                className="block px-4 py-2 hover:bg-portfolio-gray/20 text-portfolio-white cursor-pointer"
               >
                 <div className="flex items-center">
                   {project.thumbnail && (
@@ -118,7 +136,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ projects }) => {
                   )}
                   <span>{project.title}</span>
                 </div>
-              </Link>
+              </div>
             ))
           ) : query ? (
             <div className="px-4 py-2 text-sm text-portfolio-darkGray">No projects found</div>
