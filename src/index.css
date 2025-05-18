@@ -44,9 +44,6 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
-    
-    --cursor-x: 0;
-    --cursor-y: 0;
   }
 }
 
@@ -78,7 +75,7 @@
   border-radius: 50%;
   z-index: 9999;
   will-change: transform;
-  transform: translate(-50%, -50%) !important;
+  transform: translate(-50%, -50%);
 }
 
 .custom-cursor-follower {
@@ -88,7 +85,7 @@
   border-radius: 50%;
   z-index: 9998;
   will-change: transform;
-  transform: translate(-50%, -50%) !important;
+  transform: translate(-50%, -50%);
 }
 
 .project-item {

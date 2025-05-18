@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import ProjectItem from '@/components/ProjectItem';
 import CustomCursor from '@/components/CustomCursor';
 import SearchBar from '@/components/SearchBar';
 import { Link } from 'react-router-dom';
-import { Search, Mail, ArrowUp } from 'lucide-react';
+import { Search, Mail } from 'lucide-react';
 
 // Expanded project data with more examples
 const projects = [
@@ -118,11 +117,22 @@ const projects = [
 const Index: React.FC = () => {
   const contentRef = useRef<HTMLDivElement>(null);
   const [scrolled, setScrolled] = useState(false);
-  const [headerCompact, setHeaderCompact] = useState(false);
-  const [headerFullyScrolled, setHeaderFullyScrolled] = useState(false);
-  const [showSearchModal, setShowSearchModal] = useState(false);
+  const [showSearchInput, setShowSearchInput] = useState(false);
   
-  // Restore scroll position after navigation
+  // Scroll to top function
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+  
+  // Handle search button click
+  const toggleSearchInput = () => {
+    setShowSearchInput(!showSearchInput);
+  };
+  
+  // Restore scroll position after navigation and handle scroll events
   useEffect(() => {
     const savedScrollPosition = sessionStorage.getItem('scrollPosition');
     
@@ -135,145 +145,109 @@ const Index: React.FC = () => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
       sessionStorage.setItem('scrollPosition', scrollY.toString());
-      
-      setScrolled(scrollY > 20);
-      setHeaderCompact(scrollY > 60);
-      setHeaderFullyScrolled(scrollY > 120);
+      setScrolled(scrollY > 60);
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-  
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  };
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-portfolio-charcoal">
       <CustomCursor />
       
-      {/* Header with dynamic transformation */}
+      {/* Header with two clear states: normal and scrolled */}
       <header 
         className={`fixed top-0 w-full z-40 transition-all duration-500 ${
-          headerCompact 
-            ? 'py-3 bg-transparent backdrop-blur-sm bg-portfolio-charcoal/30' 
-            : 'py-6 bg-transparent backdrop-blur-0 bg-portfolio-charcoal/10'
+          scrolled 
+            ? 'py-3 bg-gradient-to-b from-portfolio-charcoal/70 to-transparent backdrop-blur-sm' 
+            : 'py-4 bg-transparent'
         }`}
       >
-        <div className={`mx-auto px-6 transition-all duration-500 ${
-          headerCompact ? 'max-w-5xl' : 'max-w-4xl'
-        }`}>
+        <div className="w-full px-6 mx-auto">
           <div className={`flex items-center transition-all duration-500 ${
-            headerCompact 
-              ? 'justify-between' 
-              : 'justify-between'
+            scrolled ? 'justify-between' : 'justify-between'
           }`}>
-            {/* Title - on the left initially, stacks under name after scroll */}
-            <div className={`transition-all duration-500 ${
-              headerCompact 
-                ? 'order-1' 
-                : 'order-1 w-1/4'
+            {/* Left: Title (normal) or Name+Title (scrolled) */}
+            <div className={`transition-all duration-500 flex ${
+              scrolled ? 'flex-col items-start' : 'items-center'
             }`}>
+              {/* Title - visible on left initially, under name when scrolled */}
               <div 
-                className={`text-sm md:text-base font-syne tracking-wider transition-all duration-500 ${
-                  headerCompact 
-                    ? 'text-portfolio-white opacity-0 absolute -z-10' 
-                    : 'text-portfolio-white'
+                className={`text-sm font-syne tracking-wider transition-all duration-500 ${
+                  scrolled 
+                    ? 'order-2 text-xs text-portfolio-white/80 mt-0.5' 
+                    : 'order-1 text-portfolio-white'
                 }`}
+                onClick={scrolled ? scrollToTop : undefined}
               >
                 GRAPHIC DESIGNER
               </div>
-            </div>
-            
-            {/* Name - centered initially, moves to left after scroll */}
-            <div 
-              className={`transition-all duration-500 cursor-pointer ${
-                headerCompact 
-                  ? 'order-1 flex flex-col items-start justify-center' 
-                  : 'order-2 w-2/4 text-center'
-              }`}
-              onClick={scrollToTop}
-            >
-              <h1 className={`font-unbounded font-semibold tracking-wider transition-all duration-500 ${
-                headerCompact 
-                  ? 'text-lg text-portfolio-white mix-blend-difference' 
-                  : 'text-xl md:text-2xl lg:text-3xl text-portfolio-white'
-              }`}>
-                RAJENDRA DAMAR
-              </h1>
               
-              {headerCompact && (
-                <div className="text-xs text-portfolio-white mix-blend-difference font-syne tracking-wider mt-0.5">
-                  GRAPHIC DESIGNER
-                </div>
+              {/* Name - centered initially, moves to left after scroll */}
+              {scrolled && (
+                <h1 
+                  className="order-1 font-unbounded font-semibold text-lg tracking-wider text-portfolio-white cursor-pointer"
+                  onClick={scrollToTop}
+                >
+                  RAJENDRA DAMAR
+                </h1>
               )}
             </div>
             
-            {/* Navigation buttons - on the right */}
-            <div className={`flex items-center gap-4 transition-all duration-500 ${
-              headerCompact 
-                ? 'order-2' 
-                : 'order-3 w-1/4 justify-end'
-            }`}>
-              {/* Search button/bar */}
-              <div className={`transition-all duration-500 ${
-                headerFullyScrolled 
-                  ? 'w-60' 
-                  : headerCompact 
-                    ? 'w-32' 
-                    : 'w-auto'
-              }`}>
-                {headerFullyScrolled ? (
+            {/* Middle: Name (normal state only) */}
+            {!scrolled && (
+              <div className="flex-1 text-center">
+                <h1 className="font-unbounded font-semibold text-xl md:text-2xl lg:text-3xl text-portfolio-white">
+                  RAJENDRA DAMAR
+                </h1>
+              </div>
+            )}
+            
+            {/* Right: Search and Contact buttons */}
+            <div className="flex items-center gap-4">
+              {/* Search bar/button */}
+              {scrolled ? (
+                <div className="w-60 transition-all duration-300">
                   <SearchBar projects={projects} />
+                </div>
+              ) : (
+                showSearchInput ? (
+                  <div className="w-48 transition-all duration-300">
+                    <SearchBar projects={projects} />
+                  </div>
                 ) : (
                   <button 
-                    onClick={() => setShowSearchModal(!showSearchModal)} 
-                    className={`transition-all duration-500 flex items-center rounded-full ${
-                      headerCompact 
-                        ? 'text-portfolio-white mix-blend-difference bg-portfolio-lightGray/20 px-4 py-2 text-sm' 
-                        : 'text-portfolio-white bg-portfolio-lightGray/10 p-2 hover:bg-portfolio-lightGray/20'
-                    }`}
+                    onClick={toggleSearchInput} 
+                    className="bg-portfolio-lightGray/10 p-2 rounded-full hover:bg-portfolio-lightGray/20 transition-all duration-300"
+                    aria-label="Search"
                   >
-                    <Search size={headerCompact ? 18 : 16} />
-                    {headerCompact && <span className="ml-2">SEARCH</span>}
+                    <Search size={18} className="text-portfolio-white" />
                   </button>
-                )}
-              </div>
+                )
+              )}
               
               {/* Contact button */}
               <Link 
                 to="/contact" 
-                className={`transition-all duration-500 flex items-center rounded-full ${
-                  headerCompact 
-                    ? 'text-portfolio-white mix-blend-difference bg-portfolio-lightGray/20 px-4 py-2 text-sm' 
-                    : 'text-portfolio-white bg-portfolio-lightGray/10 p-2 hover:bg-portfolio-lightGray/20'
+                className={`transition-all duration-300 flex items-center rounded-full ${
+                  scrolled 
+                    ? 'bg-portfolio-lightGray/20 px-4 py-2 text-sm' 
+                    : 'bg-portfolio-lightGray/10 p-2'
                 }`}
               >
-                <Mail size={headerCompact ? 18 : 16} />
-                {headerCompact && <span className="ml-2">CONTACT</span>}
+                <Mail size={scrolled ? 18 : 18} className="text-portfolio-white" />
+                {scrolled && <span className="ml-2 text-portfolio-white">CONTACT</span>}
               </Link>
             </div>
           </div>
         </div>
-        
-        {/* Search modal */}
-        {showSearchModal && !headerFullyScrolled && (
-          <div className="absolute top-full left-0 w-full bg-portfolio-charcoal bg-opacity-90 backdrop-blur-md p-4 shadow-lg">
-            <div className="max-w-2xl mx-auto">
-              <SearchBar projects={projects} />
-            </div>
-          </div>
-        )}
       </header>
       
       {/* Projects Gallery Section */}
       <main 
         ref={contentRef}
-        className="w-full pt-32 pb-16"
+        className="w-full pt-24 pb-16"
       >
         <div className="masonry-grid">
           {projects.map((project) => (
