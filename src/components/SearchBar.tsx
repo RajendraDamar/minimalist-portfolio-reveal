@@ -5,12 +5,12 @@ import { Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface SearchBarProps {
-  projects: { id: string; title: string }[];
+  projects: { id: string; title: string; thumbnail?: string }[];
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({ projects }) => {
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<{ id: string; title: string }[]>([]);
+  const [results, setResults] = useState<{ id: string; title: string; thumbnail?: string }[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [showAdminButton, setShowAdminButton] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -106,7 +106,18 @@ const SearchBar: React.FC<SearchBarProps> = ({ projects }) => {
                 className="block px-4 py-2 hover:bg-portfolio-gray/20 text-portfolio-white"
                 onClick={() => setIsOpen(false)}
               >
-                {project.title}
+                <div className="flex items-center">
+                  {project.thumbnail && (
+                    <div className="w-12 h-12 mr-3">
+                      <img 
+                        src={project.thumbnail} 
+                        alt={project.title} 
+                        className="w-full h-full object-cover rounded"
+                      />
+                    </div>
+                  )}
+                  <span>{project.title}</span>
+                </div>
               </Link>
             ))
           ) : query ? (

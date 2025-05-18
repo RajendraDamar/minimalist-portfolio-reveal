@@ -4,7 +4,7 @@ import ProjectItem from '@/components/ProjectItem';
 import CustomCursor from '@/components/CustomCursor';
 import SearchBar from '@/components/SearchBar';
 import { Link } from 'react-router-dom';
-import { Search, Mail } from 'lucide-react';
+import { Search, Mail, ArrowUp } from 'lucide-react';
 
 // Expanded project data with more examples
 const projects = [
@@ -119,6 +119,7 @@ const Index: React.FC = () => {
   const contentRef = useRef<HTMLDivElement>(null);
   const [scrolled, setScrolled] = useState(false);
   const [headerCompact, setHeaderCompact] = useState(false);
+  const [headerFullyScrolled, setHeaderFullyScrolled] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
   
   // Restore scroll position after navigation
@@ -132,14 +133,24 @@ const Index: React.FC = () => {
     }
 
     const handleScroll = () => {
-      sessionStorage.setItem('scrollPosition', window.scrollY.toString());
-      setScrolled(window.scrollY > 50);
-      setHeaderCompact(window.scrollY > 100);
+      const scrollY = window.scrollY;
+      sessionStorage.setItem('scrollPosition', scrollY.toString());
+      
+      setScrolled(scrollY > 20);
+      setHeaderCompact(scrollY > 60);
+      setHeaderFullyScrolled(scrollY > 120);
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+  
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-portfolio-charcoal">
@@ -149,8 +160,8 @@ const Index: React.FC = () => {
       <header 
         className={`fixed top-0 w-full z-40 transition-all duration-500 ${
           headerCompact 
-            ? 'py-3 bg-transparent backdrop-blur-sm' 
-            : 'py-6 bg-portfolio-charcoal'
+            ? 'py-3 bg-transparent backdrop-blur-sm bg-portfolio-charcoal/30' 
+            : 'py-6 bg-transparent backdrop-blur-0 bg-portfolio-charcoal/10'
         }`}
       >
         <div className={`mx-auto px-6 transition-all duration-500 ${
@@ -167,21 +178,26 @@ const Index: React.FC = () => {
                 ? 'order-1' 
                 : 'order-1 w-1/4'
             }`}>
-              <div className={`text-sm md:text-base font-syne tracking-wider transition-all duration-500 ${
-                headerCompact 
-                  ? 'text-portfolio-white opacity-0 absolute -z-10' 
-                  : 'text-portfolio-white'
-              }`}>
+              <div 
+                className={`text-sm md:text-base font-syne tracking-wider transition-all duration-500 ${
+                  headerCompact 
+                    ? 'text-portfolio-white opacity-0 absolute -z-10' 
+                    : 'text-portfolio-white'
+                }`}
+              >
                 GRAPHIC DESIGNER
               </div>
             </div>
             
             {/* Name - centered initially, moves to left after scroll */}
-            <div className={`transition-all duration-500 ${
-              headerCompact 
-                ? 'order-1 flex flex-col items-start justify-center' 
-                : 'order-2 w-2/4 text-center'
-            }`}>
+            <div 
+              className={`transition-all duration-500 cursor-pointer ${
+                headerCompact 
+                  ? 'order-1 flex flex-col items-start justify-center' 
+                  : 'order-2 w-2/4 text-center'
+              }`}
+              onClick={scrollToTop}
+            >
               <h1 className={`font-unbounded font-semibold tracking-wider transition-all duration-500 ${
                 headerCompact 
                   ? 'text-lg text-portfolio-white mix-blend-difference' 
@@ -203,26 +219,38 @@ const Index: React.FC = () => {
                 ? 'order-2' 
                 : 'order-3 w-1/4 justify-end'
             }`}>
-              {/* Search button */}
-              <button 
-                onClick={() => setShowSearchModal(!showSearchModal)} 
-                className={`transition-all duration-500 flex items-center ${
-                  headerCompact 
-                    ? 'text-portfolio-white mix-blend-difference px-4 py-2 text-sm' 
-                    : 'text-portfolio-white'
-                }`}
-              >
-                <Search size={headerCompact ? 18 : 16} />
-                {headerCompact && <span className="ml-2">SEARCH</span>}
-              </button>
+              {/* Search button/bar */}
+              <div className={`transition-all duration-500 ${
+                headerFullyScrolled 
+                  ? 'w-60' 
+                  : headerCompact 
+                    ? 'w-32' 
+                    : 'w-auto'
+              }`}>
+                {headerFullyScrolled ? (
+                  <SearchBar projects={projects} />
+                ) : (
+                  <button 
+                    onClick={() => setShowSearchModal(!showSearchModal)} 
+                    className={`transition-all duration-500 flex items-center rounded-full ${
+                      headerCompact 
+                        ? 'text-portfolio-white mix-blend-difference bg-portfolio-lightGray/20 px-4 py-2 text-sm' 
+                        : 'text-portfolio-white bg-portfolio-lightGray/10 p-2 hover:bg-portfolio-lightGray/20'
+                    }`}
+                  >
+                    <Search size={headerCompact ? 18 : 16} />
+                    {headerCompact && <span className="ml-2">SEARCH</span>}
+                  </button>
+                )}
+              </div>
               
               {/* Contact button */}
               <Link 
                 to="/contact" 
-                className={`transition-all duration-500 flex items-center ${
+                className={`transition-all duration-500 flex items-center rounded-full ${
                   headerCompact 
-                    ? 'text-portfolio-white mix-blend-difference px-4 py-2 text-sm' 
-                    : 'text-portfolio-white'
+                    ? 'text-portfolio-white mix-blend-difference bg-portfolio-lightGray/20 px-4 py-2 text-sm' 
+                    : 'text-portfolio-white bg-portfolio-lightGray/10 p-2 hover:bg-portfolio-lightGray/20'
                 }`}
               >
                 <Mail size={headerCompact ? 18 : 16} />
@@ -233,8 +261,8 @@ const Index: React.FC = () => {
         </div>
         
         {/* Search modal */}
-        {showSearchModal && (
-          <div className="absolute top-full left-0 w-full bg-portfolio-charcoal p-4 shadow-lg">
+        {showSearchModal && !headerFullyScrolled && (
+          <div className="absolute top-full left-0 w-full bg-portfolio-charcoal bg-opacity-90 backdrop-blur-md p-4 shadow-lg">
             <div className="max-w-2xl mx-auto">
               <SearchBar projects={projects} />
             </div>

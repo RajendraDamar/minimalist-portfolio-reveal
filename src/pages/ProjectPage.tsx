@@ -60,24 +60,24 @@ const ProjectPage: React.FC = () => {
 
   if (!project) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Project not found</p>
-        <Link to="/">Return to home</Link>
+      <div className="min-h-screen flex items-center justify-center bg-portfolio-charcoal">
+        <p className="text-portfolio-white">Project not found</p>
+        <Link to="/" className="ml-2 text-portfolio-gray hover:text-portfolio-white">Return to home</Link>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-portfolio-white overflow-hidden">
+    <div className="min-h-screen bg-portfolio-charcoal overflow-hidden">
       <CustomCursor />
       
-      <div className="max-w-screen-xl mx-auto px-6 py-16 md:py-24">
-        <Link to="/" className="inline-flex items-center text-portfolio-charcoal hover:text-portfolio-darkGray mb-12 transition-colors">
+      <div className="max-w-4xl mx-auto px-6 py-16 md:py-24">
+        <Link to="/" className="inline-flex items-center text-portfolio-white hover:text-portfolio-darkGray mb-12 transition-colors">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Projects
         </Link>
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-16 border-x border-portfolio-lightGray/20 px-8">
           {/* Left column - Image */}
           <div className="w-full h-[400px] md:h-[600px] lg:h-[80vh]">
             <img 
@@ -89,13 +89,13 @@ const ProjectPage: React.FC = () => {
           
           {/* Right column - Project details */}
           <div className="flex flex-col justify-center">
-            <h1 className="text-3xl md:text-4xl font-serif font-bold text-portfolio-charcoal mb-4 tracking-wide">{project.title.toUpperCase()}</h1>
+            <h1 className="text-3xl md:text-4xl font-serif font-bold text-portfolio-white mb-4 tracking-wide">{project.title.toUpperCase()}</h1>
             <p className="text-portfolio-darkGray mb-8">{project.year}</p>
             
             <p className="text-lg text-portfolio-darkGray mb-8">{project.description}</p>
             
-            <div className="border-t border-portfolio-lightGray pt-8">
-              <h2 className="text-xl font-serif font-medium text-portfolio-charcoal mb-4">Project Details</h2>
+            <div className="border-t border-portfolio-lightGray/20 pt-8">
+              <h2 className="text-xl font-serif font-medium text-portfolio-white mb-4">Project Details</h2>
               <p className="text-portfolio-darkGray">{project.details}</p>
             </div>
           </div>

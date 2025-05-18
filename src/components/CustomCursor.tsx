@@ -7,24 +7,19 @@ const CustomCursor: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
   const requestRef = useRef<number>();
   const previousTimeRef = useRef<number>();
+  const positionRef = useRef({ x: 0, y: 0 });
+  const followerPositionRef = useRef({ x: 0, y: 0 });
   
   const animate = (time: number) => {
     if (previousTimeRef.current !== undefined) {
-      if (!cursorRef.current || !followerRef.current) return;
+      if (!followerRef.current) return;
       
-      // Get cursor position from CSS variables to avoid layout thrashing
-      const x = parseFloat(document.documentElement.style.getPropertyValue('--cursor-x') || '0');
-      const y = parseFloat(document.documentElement.style.getPropertyValue('--cursor-y') || '0');
+      // Calculate new follower position with smoother LERP
+      followerPositionRef.current.x += (positionRef.current.x - followerPositionRef.current.x) * 0.1;
+      followerPositionRef.current.y += (positionRef.current.y - followerPositionRef.current.y) * 0.1;
       
-      // Update follower position with LERP
-      const followerX = parseFloat(followerRef.current.style.left || '0');
-      const followerY = parseFloat(followerRef.current.style.top || '0');
-      
-      const newX = followerX + (x - followerX) * 0.15;
-      const newY = followerY + (y - followerY) * 0.15;
-      
-      followerRef.current.style.left = `${newX}px`;
-      followerRef.current.style.top = `${newY}px`;
+      // Only update DOM when needed
+      followerRef.current.style.transform = `translate3d(${followerPositionRef.current.x}px, ${followerPositionRef.current.y}px, 0) translate(-50%, -50%)`;
     }
     
     previousTimeRef.current = time;
@@ -33,34 +28,29 @@ const CustomCursor: React.FC = () => {
   
   useEffect(() => {
     const updateCursorPosition = (e: MouseEvent) => {
-      // Store cursor position in CSS variables to avoid layout thrashing
-      document.documentElement.style.setProperty('--cursor-x', `${e.clientX}`);
-      document.documentElement.style.setProperty('--cursor-y', `${e.clientY}`);
+      // Store position in ref to avoid re-renders
+      positionRef.current = { x: e.clientX, y: e.clientY };
       
-      if (!cursorRef.current) return;
-      
-      // Update main cursor directly (no animation needed)
-      cursorRef.current.style.left = `${e.clientX}px`;
-      cursorRef.current.style.top = `${e.clientY}px`;
+      // Update main cursor directly without animation
+      if (cursorRef.current) {
+        cursorRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-50%, -50%)`;
+      }
     };
 
     const handleMouseEnter = () => setIsVisible(true);
     const handleMouseLeave = () => setIsVisible(false);
 
-    document.addEventListener('mousemove', updateCursorPosition);
+    document.addEventListener('mousemove', updateCursorPosition, { passive: true });
     document.addEventListener('mouseenter', handleMouseEnter);
     document.addEventListener('mouseleave', handleMouseLeave);
     
+    // Initialize follower position
+    if (followerRef.current) {
+      followerPositionRef.current = { x: positionRef.current.x, y: positionRef.current.y };
+    }
+    
     // Start animation loop
     requestRef.current = requestAnimationFrame(animate);
-    
-    // Set initial positions
-    if (followerRef.current) {
-      const x = parseFloat(document.documentElement.style.getPropertyValue('--cursor-x') || '0');
-      const y = parseFloat(document.documentElement.style.getPropertyValue('--cursor-y') || '0');
-      followerRef.current.style.left = `${x}px`;
-      followerRef.current.style.top = `${y}px`;
-    }
 
     return () => {
       document.removeEventListener('mousemove', updateCursorPosition);
@@ -80,10 +70,12 @@ const CustomCursor: React.FC = () => {
       <div 
         ref={cursorRef}
         className="custom-cursor fixed pointer-events-none z-50"
+        style={{ willChange: 'transform', backfaceVisibility: 'hidden' }}
       />
       <div 
         ref={followerRef}
         className="custom-cursor-follower fixed pointer-events-none z-40"
+        style={{ willChange: 'transform', backfaceVisibility: 'hidden' }}
       />
     </>
   );
