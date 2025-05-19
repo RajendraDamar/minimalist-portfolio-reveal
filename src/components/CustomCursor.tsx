@@ -13,6 +13,14 @@ const CustomCursor: React.FC = () => {
   const positionRef = useRef({ x: 0, y: 0 });
   const followerPositionRef = useRef({ x: 0, y: 0 });
   
+  // Don't show custom cursor on mobile/touch devices
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+  
+  useEffect(() => {
+    // Check if device is touch-based
+    setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  }, []);
+  
   const animate = (time: number) => {
     if (previousTimeRef.current !== undefined) {
       if (!followerRef.current) return;
@@ -30,6 +38,9 @@ const CustomCursor: React.FC = () => {
   };
   
   useEffect(() => {
+    // Don't initialize cursor on touch devices
+    if (isTouchDevice) return;
+    
     // Check if we're in a browser environment
     if (typeof window === 'undefined') return;
     
@@ -48,7 +59,7 @@ const CustomCursor: React.FC = () => {
 
     const handleMouseEnter = () => setIsVisible(true);
     const handleMouseLeave = () => setIsVisible(false);
-
+    
     // Initialize positions to prevent cursor jumping on load
     positionRef.current = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
     followerPositionRef.current = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
@@ -65,12 +76,16 @@ const CustomCursor: React.FC = () => {
             target.closest('.project-item') ||
             target.closest('[role="button"]') ||
             target.tagName === 'BUTTON' ||
-            target.tagName === 'A') {
+            target.tagName === 'A' ||
+            target.closest('.search-toggle') ||
+            target.closest('.like-button') ||
+            target.closest('.share-button')) {
           setCursorType('clickable');
         } else if (
           target.tagName === 'INPUT' ||
           target.tagName === 'TEXTAREA' ||
-          target.getAttribute('contenteditable') === 'true'
+          target.getAttribute('contenteditable') === 'true' ||
+          target.closest('.search-input')
         ) {
           setCursorType('text');
         } else {
@@ -104,7 +119,9 @@ const CustomCursor: React.FC = () => {
         cancelAnimationFrame(requestRef.current);
       }
     };
-  }, [isVisible]);
+  }, [isVisible, isTouchDevice]);
+
+  if (isTouchDevice) return null;
 
   return (
     <>

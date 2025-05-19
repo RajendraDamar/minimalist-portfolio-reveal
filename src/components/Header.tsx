@@ -51,13 +51,11 @@ const Header: React.FC<HeaderProps> = ({ projects }) => {
       }`}
     >
       <div 
-        className={`absolute inset-0 bg-gradient-to-b from-portfolio-charcoal/90 to-transparent transition-opacity duration-500 ${
-          scrolled ? 'opacity-100' : 'opacity-0'
-        }`}
+        className="absolute inset-0 bg-gradient-to-b from-portfolio-charcoal via-portfolio-charcoal/70 to-transparent transition-opacity duration-500"
       >
       </div>
       
-      <div className="container max-w-screen-xl mx-auto px-6">
+      <div className="container max-w-screen-xl mx-auto px-4 sm:px-6">
         <div className="relative flex items-center justify-between">
           {/* Left: Title (normal) or Name+Title (scrolled) */}
           <div className={`transition-all duration-500 flex ${
@@ -88,23 +86,21 @@ const Header: React.FC<HeaderProps> = ({ projects }) => {
           
           {/* Middle: Name (normal state only) */}
           {!scrolled && (
-            <div className="absolute left-1/2 transform -translate-x-1/2 text-center transition-all duration-500">
+            <div className="absolute left-1/2 transform -translate-x-1/2 text-center transition-all duration-500 hidden sm:block">
               <h1 className="font-unbounded font-semibold text-xl md:text-2xl lg:text-3xl text-portfolio-white">
                 RAJENDRA DAMAR
               </h1>
             </div>
           )}
           
-          {/* Right: Search and Contact buttons */}
-          <div className={`flex items-center gap-4 transition-all duration-500 ${
-            scrolled ? 'justify-end' : ''
-          }`}>
+          {/* Right: Search and Contact buttons - Adjusted for mobile */}
+          <div className="flex items-center gap-2 sm:gap-4 transition-all duration-500">
             {/* Search bar/button */}
             {scrolled ? (
-              <div className="absolute left-1/2 transform -translate-x-1/2 w-60 transition-all duration-500">
+              <div className="hidden sm:block absolute left-1/2 transform -translate-x-1/2 w-60 transition-all duration-500">
                 <div 
                   onClick={toggleSearchInput}
-                  className={`transition-all duration-300 flex items-center justify-center rounded-full ${showSearchInput ? 'w-full bg-portfolio-lightGray/30' : 'w-10 bg-portfolio-lightGray/20'} h-10 hover:bg-portfolio-lightGray/30 cursor-pointer`}
+                  className={`search-toggle transition-all duration-300 flex items-center justify-center rounded-full ${showSearchInput ? 'w-full bg-portfolio-lightGray/30' : 'w-10 bg-portfolio-lightGray/20'} h-10 hover:bg-portfolio-lightGray/30 cursor-pointer`}
                 >
                   {showSearchInput ? (
                     <SearchBar projects={projects} expanded={true} closeSearch={() => setShowSearchInput(false)} />
@@ -128,12 +124,12 @@ const Header: React.FC<HeaderProps> = ({ projects }) => {
               to="/contact" 
               className={`transition-all duration-500 flex items-center rounded-full ${
                 scrolled 
-                  ? 'bg-portfolio-lightGray/20 px-4 py-2 text-sm hover:bg-portfolio-lightGray/30' 
+                  ? 'bg-portfolio-lightGray/20 px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm hover:bg-portfolio-lightGray/30' 
                   : 'bg-portfolio-lightGray/20 p-2 hover:bg-portfolio-lightGray/30'
               }`}
             >
-              <Mail size={scrolled ? 18 : 18} className="text-portfolio-white" />
-              {scrolled && <span className="ml-2 text-portfolio-white">CONTACT</span>}
+              <Mail size={scrolled ? 16 : 18} className="text-portfolio-white" />
+              {scrolled && <span className="ml-2 text-portfolio-white hidden sm:inline">CONTACT</span>}
             </Link>
           </div>
         </div>

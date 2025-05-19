@@ -97,13 +97,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
   };
   
   return (
-    <div className={`relative w-full ${className}`} ref={searchRef}>
+    <div className={`relative w-full ${className} search-input`} ref={searchRef}>
       <div className="relative flex items-center w-full">
         <Search className="absolute left-3 h-4 w-4 text-portfolio-gray" />
-        {expanded && !isActive ? (
+        {!isActive ? (
           <div 
             onClick={activateInput}
-            className="w-full h-10 cursor-pointer flex items-center pl-10 pr-4 py-2 text-sm text-portfolio-white/70"
+            className="search-toggle w-full h-10 cursor-pointer flex items-center pl-10 pr-4 py-2 text-sm text-portfolio-white/70"
           >
             Search projects...
           </div>

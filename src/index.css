@@ -66,6 +66,13 @@
   h4, h5, h6 {
     font-family: 'Syne', sans-serif;
   }
+
+  /* Disable default cursor on clickable and typeable elements */
+  button, a, input, textarea, [contenteditable="true"], [role="button"],
+  .project-item, .cursor-pointer, .search-toggle, .search-input,
+  .like-button, .share-button {
+    cursor: none !important;
+  }
 }
 
 /* Base cursor styles */
@@ -78,6 +85,7 @@
   will-change: transform;
   transform: translate(-50%, -50%);
   transition: opacity 0.3s ease, width 0.2s, height 0.2s;
+  mix-blend-mode: difference;
 }
 
 .custom-cursor-follower {
@@ -189,6 +197,15 @@
   animation: fadeIn 0.3s ease-out;
 }
 
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.animate-fade-out {
+  animation: fadeOut 0.3s ease-out forwards;
+}
+
 .container {
   width: 100%;
   margin-left: auto;
@@ -205,12 +222,15 @@
     @apply py-2;
   }
   
-  .custom-cursor, .custom-cursor-follower {
-    display: none;
+  body {
+    cursor: auto !important;
   }
   
-  body {
-    cursor: auto;
+  /* Show regular cursor on mobile */
+  button, a, input, textarea, [contenteditable="true"], [role="button"],
+  .project-item, .cursor-pointer, .search-toggle, .search-input,
+  .like-button, .share-button {
+    cursor: auto !important;
   }
   
   /* Mobile header optimizations */
@@ -222,14 +242,8 @@
     @apply text-lg;
   }
   
-  /* Adjust search and contact positions */
+  /* Use the padding from the container for mobile */
   header .absolute {
-    position: relative !important;
-    transform: none !important;
-    left: auto !important;
-  }
-  
-  header .flex {
-    @apply justify-between;
+    @apply px-3;
   }
 }
