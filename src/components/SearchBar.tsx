@@ -19,6 +19,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<{ id: string; title: string; thumbnail?: string }[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [isActive, setIsActive] = useState(false);
   const [showAdminButton, setShowAdminButton] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -60,18 +61,27 @@ const SearchBar: React.FC<SearchBarProps> = ({
     if (closeSearch) closeSearch();
   };
   
-  // Focus input when expanded
-  useEffect(() => {
-    if (expanded && inputRef.current) {
+  // Activate input when expanded
+  const activateInput = () => {
+    setIsActive(true);
+    if (inputRef.current) {
       inputRef.current.focus();
     }
-  }, [expanded]);
+  };
+  
+  // Focus input when expanded and active
+  useEffect(() => {
+    if (expanded && isActive && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [expanded, isActive]);
   
   // Close search results when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setIsOpen(false);
+        setIsActive(false);
       }
     };
     
@@ -90,15 +100,24 @@ const SearchBar: React.FC<SearchBarProps> = ({
     <div className={`relative w-full ${className}`} ref={searchRef}>
       <div className="relative flex items-center w-full">
         <Search className="absolute left-3 h-4 w-4 text-portfolio-gray" />
-        <input
-          ref={inputRef}
-          type="text"
-          value={query}
-          onChange={(e) => handleSearch(e.target.value)}
-          onFocus={() => setIsOpen(true)}
-          placeholder="Search projects..."
-          className="pl-10 pr-4 py-2 w-full bg-transparent rounded-full text-sm text-portfolio-white focus:outline-none transition-all"
-        />
+        {expanded && !isActive ? (
+          <div 
+            onClick={activateInput}
+            className="w-full h-10 cursor-pointer flex items-center pl-10 pr-4 py-2 text-sm text-portfolio-white/70"
+          >
+            Search projects...
+          </div>
+        ) : (
+          <input
+            ref={inputRef}
+            type="text"
+            value={query}
+            onChange={(e) => handleSearch(e.target.value)}
+            onFocus={() => setIsOpen(true)}
+            placeholder="Search projects..."
+            className="pl-10 pr-4 py-2 w-full bg-transparent rounded-full text-sm text-portfolio-white focus:outline-none transition-all"
+          />
+        )}
         {query && (
           <button
             onClick={() => {

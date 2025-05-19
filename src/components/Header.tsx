@@ -51,11 +51,10 @@ const Header: React.FC<HeaderProps> = ({ projects }) => {
       }`}
     >
       <div 
-        className={`absolute inset-0 transition-opacity duration-500 ${
+        className={`absolute inset-0 bg-gradient-to-b from-portfolio-charcoal/90 to-transparent transition-opacity duration-500 ${
           scrolled ? 'opacity-100' : 'opacity-0'
         }`}
       >
-        <div className="absolute inset-0 bg-portfolio-charcoal/80"></div>
       </div>
       
       <div className="container max-w-screen-xl mx-auto px-6">
@@ -89,8 +88,8 @@ const Header: React.FC<HeaderProps> = ({ projects }) => {
           
           {/* Middle: Name (normal state only) */}
           {!scrolled && (
-            <div className="absolute left-1/2 transform -translate-x-1/2 text-center">
-              <h1 className="font-unbounded font-semibold text-xl md:text-2xl lg:text-3xl text-portfolio-white transition-all">
+            <div className="absolute left-1/2 transform -translate-x-1/2 text-center transition-all duration-500">
+              <h1 className="font-unbounded font-semibold text-xl md:text-2xl lg:text-3xl text-portfolio-white">
                 RAJENDRA DAMAR
               </h1>
             </div>
@@ -102,13 +101,13 @@ const Header: React.FC<HeaderProps> = ({ projects }) => {
           }`}>
             {/* Search bar/button */}
             {scrolled ? (
-              <div className="w-60 transition-all duration-500 absolute left-1/2 transform -translate-x-1/2">
+              <div className="absolute left-1/2 transform -translate-x-1/2 w-60 transition-all duration-500">
                 <div 
                   onClick={toggleSearchInput}
-                  className={`transition-all duration-300 flex items-center justify-center rounded-full ${showSearchInput ? 'w-full' : 'w-10'} h-10 bg-portfolio-lightGray/20 hover:bg-portfolio-lightGray/30 cursor-pointer`}
+                  className={`transition-all duration-300 flex items-center justify-center rounded-full ${showSearchInput ? 'w-full bg-portfolio-lightGray/30' : 'w-10 bg-portfolio-lightGray/20'} h-10 hover:bg-portfolio-lightGray/30 cursor-pointer`}
                 >
                   {showSearchInput ? (
-                    <SearchBar projects={projects} closeSearch={() => setShowSearchInput(false)} />
+                    <SearchBar projects={projects} expanded={true} closeSearch={() => setShowSearchInput(false)} />
                   ) : (
                     <Search size={20} className="text-portfolio-white" />
                   )}

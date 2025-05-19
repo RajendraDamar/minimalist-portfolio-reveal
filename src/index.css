@@ -212,4 +212,24 @@
   body {
     cursor: auto;
   }
+  
+  /* Mobile header optimizations */
+  header .container {
+    @apply px-3;
+  }
+  
+  header h1 {
+    @apply text-lg;
+  }
+  
+  /* Adjust search and contact positions */
+  header .absolute {
+    position: relative !important;
+    transform: none !important;
+    left: auto !important;
+  }
+  
+  header .flex {
+    @apply justify-between;
+  }
 }

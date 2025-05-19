@@ -63,6 +63,7 @@ const CustomCursor: React.FC = () => {
             target.closest('a') || 
             target.closest('.cursor-pointer') ||
             target.closest('.project-item') ||
+            target.closest('[role="button"]') ||
             target.tagName === 'BUTTON' ||
             target.tagName === 'A') {
           setCursorType('clickable');

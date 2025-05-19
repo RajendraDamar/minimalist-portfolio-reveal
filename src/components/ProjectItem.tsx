@@ -87,7 +87,7 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
         {/* Like button */}
         <button 
           onClick={handleLike} 
-          className={`absolute bottom-3 left-3 bg-portfolio-charcoal/70 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 ${liked ? 'text-red-500' : 'text-portfolio-white'}`}
+          className={`absolute bottom-3 left-3 bg-portfolio-charcoal/70 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 ${liked ? 'text-red-500' : 'text-portfolio-white'} flex items-center`}
           aria-label="Like"
         >
           <Heart size={18} fill={liked ? "currentColor" : "none"} />
