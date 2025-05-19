@@ -7,9 +7,15 @@ interface SearchBarProps {
   projects: { id: string; title: string; thumbnail?: string }[];
   expanded?: boolean;
   className?: string;
+  closeSearch?: () => void;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ projects, expanded = false, className = '' }) => {
+const SearchBar: React.FC<SearchBarProps> = ({ 
+  projects, 
+  expanded = false, 
+  className = '',
+  closeSearch
+}) => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<{ id: string; title: string; thumbnail?: string }[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -51,6 +57,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ projects, expanded = false, class
     navigate(`/project/${projectId}`);
     setIsOpen(false);
     setQuery('');
+    if (closeSearch) closeSearch();
   };
   
   // Focus input when expanded
@@ -80,7 +87,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ projects, expanded = false, class
   };
   
   return (
-    <div className={`relative ${className}`} ref={searchRef}>
+    <div className={`relative w-full ${className}`} ref={searchRef}>
       <div className="relative flex items-center w-full">
         <Search className="absolute left-3 h-4 w-4 text-portfolio-gray" />
         <input
@@ -90,7 +97,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ projects, expanded = false, class
           onChange={(e) => handleSearch(e.target.value)}
           onFocus={() => setIsOpen(true)}
           placeholder="Search projects..."
-          className="pl-10 pr-4 py-2 w-full bg-portfolio-lightGray/80 backdrop-blur-sm rounded-full text-sm text-portfolio-white focus:outline-none focus:ring-1 focus:ring-portfolio-gray transition-all"
+          className="pl-10 pr-4 py-2 w-full bg-transparent rounded-full text-sm text-portfolio-white focus:outline-none transition-all"
         />
         {query && (
           <button
@@ -98,6 +105,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ projects, expanded = false, class
               setQuery('');
               setResults([]);
               setShowAdminButton(false);
+              if (closeSearch) closeSearch();
             }}
             className="absolute right-3"
           >
