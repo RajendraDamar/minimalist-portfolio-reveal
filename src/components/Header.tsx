@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { Mail } from 'lucide-react';
+import { Mail, Search } from 'lucide-react';
 import SearchBar from '@/components/SearchBar';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 
@@ -100,25 +100,34 @@ const Header: React.FC<HeaderProps> = ({ projects }) => {
             {/* Search bar/button - Only on desktop */}
             {!isMobile && (
               scrolled ? (
-                <div className="hidden sm:block absolute left-1/2 transform -translate-x-1/2 w-60 transition-all duration-500">
+                <div className="hidden sm:block absolute left-1/2 transform -translate-x-1/2 w-60 transition-all duration-300">
                   <div 
-                    onClick={toggleSearchInput}
-                    className={`search-toggle transition-all duration-300 flex items-center justify-center rounded-full ${showSearchInput ? 'w-full bg-portfolio-lightGray/30' : 'w-10 bg-portfolio-lightGray/20'} h-10 hover:bg-portfolio-lightGray/30 cursor-pointer`}
+                    className={`search-toggle transition-all duration-300 flex items-center justify-center rounded-full ${showSearchInput ? 'w-full bg-portfolio-lightGray/30' : 'w-10 h-10 bg-portfolio-lightGray/20'} hover:bg-portfolio-lightGray/30 cursor-pointer`}
                   >
                     {showSearchInput ? (
-                      <SearchBar projects={projects} expanded={true} closeSearch={() => setShowSearchInput(false)} />
+                      <SearchBar 
+                        projects={projects} 
+                        expanded={true} 
+                        closeSearch={() => setShowSearchInput(false)} 
+                        initialIsActive={true}
+                      />
                     ) : (
-                      <span className="text-portfolio-white text-sm">Search projects...</span>
+                      <Search 
+                        className="text-portfolio-white" 
+                        size={18} 
+                        onClick={toggleSearchInput}
+                      />
                     )}
                   </div>
                 </div>
               ) : (
                 <button 
                   onClick={toggleSearchInput} 
-                  className="bg-portfolio-lightGray/20 px-4 py-2 rounded-full hover:bg-portfolio-lightGray/30 transition-all duration-300 text-sm"
+                  className="bg-portfolio-lightGray/20 px-4 py-2 rounded-full hover:bg-portfolio-lightGray/30 transition-all duration-300 text-sm flex items-center"
                   aria-label="Search"
                 >
-                  Search projects...
+                  <Search className="mr-2 text-portfolio-white" size={16} />
+                  <span className="text-portfolio-white/70">Search projects...</span>
                 </button>
               )
             )}

@@ -8,18 +8,20 @@ interface SearchBarProps {
   expanded?: boolean;
   className?: string;
   closeSearch?: () => void;
+  initialIsActive?: boolean;
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({ 
   projects, 
   expanded = false, 
   className = '',
-  closeSearch
+  closeSearch,
+  initialIsActive = false
 }) => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<{ id: string; title: string; thumbnail?: string }[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [isActive, setIsActive] = useState(false);
+  const [isActive, setIsActive] = useState(initialIsActive);
   const [showAdminButton, setShowAdminButton] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -73,7 +75,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   
   // Focus input when expanded and active
   useEffect(() => {
-    if (expanded && isActive && inputRef.current) {
+    if ((expanded || isActive) && inputRef.current) {
       inputRef.current.focus();
     }
   }, [expanded, isActive]);
@@ -83,13 +85,16 @@ const SearchBar: React.FC<SearchBarProps> = ({
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setIsOpen(false);
-        setIsActive(false);
+        // Only deactivate if we're supposed to close on outside click
+        if (closeSearch) {
+          setIsActive(false);
+        }
       }
     };
     
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [closeSearch]);
   
   // Generate secure admin URL with timestamp and hash
   const generateAdminUrl = () => {
@@ -101,33 +106,39 @@ const SearchBar: React.FC<SearchBarProps> = ({
   return (
     <div className={`relative w-full ${className} search-input`} ref={searchRef}>
       <div className="relative flex items-center w-full">
-        <Search className="absolute left-3 h-4 w-4 text-portfolio-gray" />
         {!isActive ? (
           <div 
             onClick={activateInput}
-            className="search-toggle w-full h-10 cursor-pointer flex items-center pl-10 pr-4 py-2 text-sm text-portfolio-white/70"
+            className="search-toggle flex items-center justify-center cursor-pointer w-full h-full"
           >
-            Search projects...
+            <Search className="h-4 w-4 text-portfolio-white" />
+            {!expanded && <span className="ml-2 text-portfolio-white/70 text-sm">Search projects...</span>}
           </div>
         ) : (
-          <input
-            ref={inputRef}
-            type="text"
-            value={query}
-            onChange={(e) => handleSearch(e.target.value)}
-            onFocus={() => setIsOpen(true)}
-            placeholder="Search projects..."
-            className="pl-10 pr-4 py-2 w-full bg-transparent rounded-full text-sm text-portfolio-white focus:outline-none transition-all"
-          />
+          <>
+            <Search className="absolute left-3 h-4 w-4 text-portfolio-gray" />
+            <input
+              ref={inputRef}
+              type="text"
+              value={query}
+              onChange={(e) => handleSearch(e.target.value)}
+              onFocus={() => setIsOpen(true)}
+              placeholder="Search projects..."
+              className="pl-10 pr-4 py-2 w-full bg-transparent rounded-full text-sm text-portfolio-white focus:outline-none transition-all"
+              autoFocus
+            />
+          </>
         )}
-        {query && (
+        {isActive && query && (
           <button
             onClick={() => {
               setQuery('');
               setResults([]);
               setShowAdminButton(false);
-              setIsActive(false);
-              if (closeSearch) closeSearch();
+              if (closeSearch) {
+                setIsActive(false);
+                closeSearch();
+              }
             }}
             className="absolute right-3"
           >

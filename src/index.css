@@ -164,7 +164,7 @@ a,
 .search-toggle, 
 .like-button, 
 .share-button {
-  @apply transition-transform duration-200;
+  @apply transition-all duration-200;
 }
 
 button:hover:not(:disabled), 
@@ -172,7 +172,7 @@ a:hover,
 .search-toggle:hover,
 .like-button:hover, 
 .share-button:hover {
-  @apply scale-105;
+  @apply scale-105 bg-portfolio-lightGray/40;
 }
 
 input, textarea, [contenteditable="true"] {
@@ -181,6 +181,19 @@ input, textarea, [contenteditable="true"] {
 
 input:focus, textarea:focus, [contenteditable="true"]:focus {
   @apply ring-1 ring-portfolio-white/30;
+}
+
+/* Search input specific styles */
+.search-toggle {
+  @apply h-10 rounded-full transition-all duration-300;
+}
+
+.search-toggle:hover {
+  @apply bg-portfolio-lightGray/40;
+}
+
+.search-input input {
+  @apply h-10 rounded-full;
 }
 
 .masonry-grid {
@@ -309,5 +322,10 @@ input:focus, textarea:focus, [contenteditable="true"]:focus {
   /* Mobile likes display */
   .like-count {
     @apply ml-1;
+  }
+  
+  /* Ensure vignette shows on mobile */
+  .header-vignette {
+    @apply opacity-100;
   }
 }
