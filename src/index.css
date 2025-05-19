@@ -158,6 +158,31 @@
   @apply opacity-100 translate-y-0;
 }
 
+/* Enhanced hover effects for buttons and inputs */
+button, 
+a,
+.search-toggle, 
+.like-button, 
+.share-button {
+  @apply transition-transform duration-200;
+}
+
+button:hover:not(:disabled), 
+a:hover, 
+.search-toggle:hover,
+.like-button:hover, 
+.share-button:hover {
+  @apply scale-105;
+}
+
+input, textarea, [contenteditable="true"] {
+  @apply transition-all duration-200;
+}
+
+input:focus, textarea:focus, [contenteditable="true"]:focus {
+  @apply ring-1 ring-portfolio-white/30;
+}
+
 .masonry-grid {
   @apply w-full;
   column-count: 1;
@@ -212,6 +237,40 @@
   margin-right: auto;
 }
 
+/* Header vignette effect */
+.header-vignette {
+  background: linear-gradient(to bottom, rgba(22, 22, 26, 1) 0%, rgba(22, 22, 26, 0.8) 50%, rgba(22, 22, 26, 0) 100%);
+}
+
+/* Share dropdown styles */
+.share-dropdown {
+  @apply fixed z-50 bg-portfolio-lightGray/90 backdrop-blur-md rounded-md shadow-lg py-2 text-portfolio-white;
+  min-width: 180px;
+  transform-origin: top right;
+  animation: slideIn 0.2s ease-out forwards;
+}
+
+@keyframes slideIn {
+  from { 
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.share-dropdown-item {
+  @apply px-4 py-2 hover:bg-portfolio-gray/30 cursor-pointer transition-colors;
+}
+
+/* Project hover grayscale effect */
+.project-item:hover img,
+.project-item:hover video {
+  @apply grayscale;
+}
+
 /* Mobile optimizations */
 @media (max-width: 640px) {
   .project-item-title {
@@ -245,5 +304,10 @@
   /* Use the padding from the container for mobile */
   header .absolute {
     @apply px-3;
+  }
+  
+  /* Mobile likes display */
+  .like-count {
+    @apply ml-1;
   }
 }

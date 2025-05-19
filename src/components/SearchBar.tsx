@@ -64,9 +64,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
   // Activate input when expanded
   const activateInput = () => {
     setIsActive(true);
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, 10);
   };
   
   // Focus input when expanded and active
@@ -124,6 +126,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
               setQuery('');
               setResults([]);
               setShowAdminButton(false);
+              setIsActive(false);
               if (closeSearch) closeSearch();
             }}
             className="absolute right-3"

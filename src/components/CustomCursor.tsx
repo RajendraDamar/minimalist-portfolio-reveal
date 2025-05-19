@@ -6,7 +6,7 @@ type CursorType = 'default' | 'clickable' | 'text';
 const CustomCursor: React.FC = () => {
   const cursorRef = useRef<HTMLDivElement>(null);
   const followerRef = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const [cursorType, setCursorType] = useState<CursorType>('default');
   const requestRef = useRef<number>();
   const previousTimeRef = useRef<number>();
@@ -19,6 +19,20 @@ const CustomCursor: React.FC = () => {
   useEffect(() => {
     // Check if device is touch-based
     setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
+    
+    // Initialize cursor position to center of screen to prevent initial jump
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    
+    if (cursorRef.current) {
+      cursorRef.current.style.transform = `translate3d(${centerX}px, ${centerY}px, 0)`;
+      positionRef.current = { x: centerX, y: centerY };
+    }
+    
+    if (followerRef.current) {
+      followerRef.current.style.transform = `translate3d(${centerX}px, ${centerY}px, 0)`;
+      followerPositionRef.current = { x: centerX, y: centerY };
+    }
   }, []);
   
   const animate = (time: number) => {
@@ -52,17 +66,10 @@ const CustomCursor: React.FC = () => {
       if (cursorRef.current) {
         cursorRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
       }
-      
-      // Set visibility on first mouse movement
-      if (!isVisible) setIsVisible(true);
     };
 
     const handleMouseEnter = () => setIsVisible(true);
     const handleMouseLeave = () => setIsVisible(false);
-    
-    // Initialize positions to prevent cursor jumping on load
-    positionRef.current = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-    followerPositionRef.current = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
     
     // Function to update cursor based on what it's hovering
     const updateCursorType = () => {
@@ -119,7 +126,7 @@ const CustomCursor: React.FC = () => {
         cancelAnimationFrame(requestRef.current);
       }
     };
-  }, [isVisible, isTouchDevice]);
+  }, [isTouchDevice]);
 
   if (isTouchDevice) return null;
 

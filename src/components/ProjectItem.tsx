@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Heart, Share2 } from 'lucide-react';
 
@@ -25,6 +25,9 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
   const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
   const [liked, setLiked] = useState(false);
+  const [showShareMenu, setShowShareMenu] = useState(false);
+  const shareMenuRef = useRef<HTMLDivElement | null>(null);
+  const shareButtonRef = useRef<HTMLButtonElement | null>(null);
   
   const handleClick = () => {
     navigate(`/project/${id}`);
@@ -39,61 +42,38 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
 
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
-    
-    // Create a sharing function similar to davidmilan.com
-    const shareUrl = window.location.origin + `/project/${id}`;
-    const shareTitle = title;
-    const shareOptions = [
-      { name: 'Copy Link', action: () => copyToClipboard(shareUrl) },
-      { name: 'Facebook', action: () => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, '_blank') },
-      { name: 'Twitter', action: () => window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareTitle)}`, '_blank') },
-      { name: 'LinkedIn', action: () => window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`, '_blank') },
-      { name: 'WhatsApp', action: () => window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareTitle + ' ' + shareUrl)}`, '_blank') },
-      { name: 'Email', action: () => window.open(`mailto:?subject=${encodeURIComponent(shareTitle)}&body=${encodeURIComponent(shareUrl)}`, '_blank') }
-    ];
-    
-    // Create popup menu
-    const menu = document.createElement('div');
-    menu.className = 'fixed z-50 bg-portfolio-lightGray/90 backdrop-blur-md rounded-md shadow-lg py-2 text-portfolio-white animate-fade-in';
-    menu.style.minWidth = '180px';
-    
-    // Determine position
-    const rect = (e.target as HTMLElement).getBoundingClientRect();
-    menu.style.top = `${rect.bottom + 10}px`;
-    menu.style.right = `20px`;
-    
-    // Add menu items
-    shareOptions.forEach(option => {
-      const item = document.createElement('div');
-      item.className = 'px-4 py-2 hover:bg-portfolio-gray/30 cursor-pointer transition-colors';
-      item.textContent = option.name;
-      item.onclick = () => {
-        option.action();
-        document.body.removeChild(menu);
-      };
-      menu.appendChild(item);
-    });
-    
-    // Close when clicking outside
-    const handleOutsideClick = (event: MouseEvent) => {
-      if (!menu.contains(event.target as Node)) {
-        if (document.body.contains(menu)) {
-          document.body.removeChild(menu);
-        }
-        document.removeEventListener('click', handleOutsideClick);
+    setShowShareMenu(!showShareMenu);
+  };
+  
+  // Close share menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        shareMenuRef.current && 
+        !shareMenuRef.current.contains(event.target as Node) &&
+        shareButtonRef.current &&
+        !shareButtonRef.current.contains(event.target as Node)
+      ) {
+        setShowShareMenu(false);
+      }
+    };
+
+    const handleScroll = () => {
+      if (showShareMenu) {
+        setShowShareMenu(false);
       }
     };
     
-    // Add to DOM
-    document.body.appendChild(menu);
+    document.addEventListener('mousedown', handleClickOutside);
+    window.addEventListener('scroll', handleScroll);
     
-    // Add click listener with small delay to avoid immediate closure
-    setTimeout(() => {
-      document.addEventListener('click', handleOutsideClick);
-    }, 100);
-  };
-  
-  // Helper for clipboard
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [showShareMenu]);
+
+  // Copy to clipboard helper
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     
@@ -106,10 +86,24 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
     setTimeout(() => {
       toast.classList.replace('animate-fade-in', 'animate-fade-out');
       setTimeout(() => {
-        document.body.removeChild(toast);
+        if (document.body.contains(toast)) {
+          document.body.removeChild(toast);
+        }
       }, 300);
     }, 2000);
   };
+  
+  // Share options
+  const shareUrl = window.location.origin + `/project/${id}`;
+  const shareTitle = title;
+  const shareOptions = [
+    { name: 'Copy Link', action: () => copyToClipboard(shareUrl) },
+    { name: 'Facebook', action: () => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, '_blank') },
+    { name: 'Twitter', action: () => window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareTitle)}`, '_blank') },
+    { name: 'LinkedIn', action: () => window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`, '_blank') },
+    { name: 'WhatsApp', action: () => window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareTitle + ' ' + shareUrl)}`, '_blank') },
+    { name: 'Email', action: () => window.open(`mailto:?subject=${encodeURIComponent(shareTitle)}&body=${encodeURIComponent(shareUrl)}`, '_blank') }
+  ];
   
   return (
     <div 
@@ -117,14 +111,17 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
       className="project-item block mb-0 break-inside-avoid cursor-none"
       style={{ display: 'block' }}
       onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        setShowShareMenu(false);
+      }}
     >
       <div className={`relative ${aspectRatio} ${background} overflow-hidden group`}>
         {type === 'image' ? (
           <img 
             src={thumbnail} 
             alt={title} 
-            className={`w-full h-full object-cover transition-all duration-300 ${isHovered ? 'grayscale' : ''}`}
+            className="w-full h-full object-cover transition-all duration-300"
           />
         ) : (
           <video 
@@ -133,21 +130,22 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
             muted 
             loop 
             playsInline
-            className={`w-full h-full object-cover transition-all duration-300 ${isHovered ? 'grayscale' : ''}`}
+            className="w-full h-full object-cover transition-all duration-300"
           />
         )}
         <div className="project-item-overlay">
           <h3 className="project-item-title font-unbounded">{title}</h3>
         </div>
 
-        {/* Like button */}
+        {/* Like button with count shown inline */}
         <button 
+          ref={shareButtonRef}
           onClick={handleLike} 
           className={`like-button absolute bottom-3 left-3 bg-portfolio-charcoal/70 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 ${liked ? 'text-red-500' : 'text-portfolio-white'} flex items-center`}
           aria-label="Like"
         >
           <Heart size={18} fill={liked ? "currentColor" : "none"} />
-          {likes > 0 && <span className="ml-1 text-xs">{likes}</span>}
+          {likes > 0 && <span className="like-count text-xs">{likes}</span>}
         </button>
 
         {/* Share button */}
@@ -158,6 +156,29 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
         >
           <Share2 size={18} />
         </button>
+        
+        {/* Share dropdown menu */}
+        {showShareMenu && (
+          <div 
+            ref={shareMenuRef}
+            className="share-dropdown absolute bottom-14 right-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {shareOptions.map((option, index) => (
+              <div 
+                key={index} 
+                className="share-dropdown-item"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  option.action();
+                  setShowShareMenu(false);
+                }}
+              >
+                {option.name}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
