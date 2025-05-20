@@ -121,7 +121,7 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
           <img 
             src={thumbnail} 
             alt={title} 
-            className="w-full h-full object-cover transition-all duration-300"
+            className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
           />
         ) : (
           <video 
@@ -130,28 +130,30 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
             muted 
             loop 
             playsInline
-            className="w-full h-full object-cover transition-all duration-300"
+            className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
           />
         )}
-        <div className="project-item-overlay">
-          <h3 className="project-item-title font-unbounded">{title}</h3>
+        
+        {/* Enhanced overlay with title that shows on hover */}
+        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+          <h3 className="text-xl md:text-2xl font-unbounded text-white text-center px-4 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">{title}</h3>
         </div>
 
         {/* Like button with count shown inline */}
         <button 
           ref={shareButtonRef}
           onClick={handleLike} 
-          className={`like-button absolute bottom-3 left-3 bg-portfolio-charcoal/70 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 ${liked ? 'text-red-500' : 'text-portfolio-white'} flex items-center`}
+          className="like-button absolute bottom-3 left-3 bg-portfolio-charcoal/70 hover:bg-portfolio-charcoal/90 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 text-portfolio-white flex items-center transform hover:scale-110 transition-all"
           aria-label="Like"
         >
           <Heart size={18} fill={liked ? "currentColor" : "none"} />
-          {likes > 0 && <span className="like-count text-xs">{likes}</span>}
+          {likes > 0 && <span className="like-count text-xs ml-1">{likes}</span>}
         </button>
 
         {/* Share button */}
         <button 
           onClick={handleShare} 
-          className="share-button absolute bottom-3 right-3 bg-portfolio-charcoal/70 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 text-portfolio-white"
+          className="share-button absolute bottom-3 right-3 bg-portfolio-charcoal/70 hover:bg-portfolio-charcoal/90 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 text-portfolio-white transform hover:scale-110 transition-all"
           aria-label="Share"
         >
           <Share2 size={18} />
@@ -161,13 +163,13 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
         {showShareMenu && (
           <div 
             ref={shareMenuRef}
-            className="share-dropdown absolute bottom-14 right-3"
+            className="share-dropdown absolute bottom-14 right-3 bg-portfolio-gray/90 backdrop-blur-sm rounded-md shadow-lg overflow-hidden z-20"
             onClick={(e) => e.stopPropagation()}
           >
             {shareOptions.map((option, index) => (
               <div 
                 key={index} 
-                className="share-dropdown-item"
+                className="px-4 py-2 hover:bg-portfolio-gray/70 text-portfolio-white text-sm cursor-pointer transition-all duration-200"
                 onClick={(e) => {
                   e.stopPropagation();
                   option.action();

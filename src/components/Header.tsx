@@ -63,7 +63,7 @@ const Header: React.FC<HeaderProps> = ({ projects }) => {
             {/* Name - Shown on mobile always, or when scrolled on desktop */}
             {(scrolled || isMobile) && (
               <h1 
-                className="order-1 font-unbounded font-semibold text-lg tracking-wider text-portfolio-white cursor-pointer transition-all duration-500"
+                className="order-1 font-unbounded font-semibold text-lg tracking-wider text-portfolio-white cursor-pointer transition-all duration-500 hover:text-portfolio-white/80"
                 onClick={scrollToTop}
               >
                 RAJENDRA DAMAR
@@ -86,7 +86,10 @@ const Header: React.FC<HeaderProps> = ({ projects }) => {
           {/* Middle: Name (normal state only on desktop) */}
           {!scrolled && !isMobile && (
             <div className="absolute left-1/2 transform -translate-x-1/2 text-center transition-all duration-500 hidden sm:block">
-              <h1 className="font-unbounded font-semibold text-xl md:text-2xl lg:text-3xl text-portfolio-white">
+              <h1 
+                className="font-unbounded font-semibold text-xl md:text-2xl lg:text-3xl text-portfolio-white hover:text-portfolio-white/80 transition-all cursor-pointer"
+                onClick={scrollToTop}
+              >
                 RAJENDRA DAMAR
               </h1>
             </div>
@@ -94,11 +97,11 @@ const Header: React.FC<HeaderProps> = ({ projects }) => {
           
           {/* Right: Search and Contact buttons - Adjusted for mobile */}
           <div className="flex items-center gap-2 sm:gap-4 transition-all duration-500">
-            {/* Search bar/button - Moved to be next to contact when scrolled */}
+            {/* Search bar/button */}
             {!isMobile && (
               scrolled ? (
-                <div className="flex items-center gap-2 sm:gap-4">
-                  <div className="w-60 transition-all duration-300">
+                <div className="flex items-center">
+                  <div className="w-52 transition-all duration-300 mr-2">
                     <SearchBar 
                       projects={projects} 
                       expanded={true} 
@@ -128,7 +131,7 @@ const Header: React.FC<HeaderProps> = ({ projects }) => {
               )
             )}
             
-            {/* Contact button */}
+            {/* Contact button with enhanced hover */}
             <Link 
               to="/contact" 
               className={`transition-all duration-300 flex items-center rounded-full transform hover:scale-105 ${

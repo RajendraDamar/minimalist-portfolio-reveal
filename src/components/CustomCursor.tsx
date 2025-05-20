@@ -18,14 +18,16 @@ const CustomCursor: React.FC = () => {
       setPosition({ x: e.clientX, y: e.clientY });
     };
     
+    // Optimize follower position updates with RAF and improved smoothing
     const updateFollowerPosition = () => {
       setFollowerPosition(prevPos => {
+        // Use a faster animation for smoother following (0.2 instead of 0.1)
         return {
-          x: prevPos.x + (position.x - prevPos.x) * 0.1,
-          y: prevPos.y + (position.y - prevPos.y) * 0.1
+          x: prevPos.x + (position.x - prevPos.x) * 0.2,
+          y: prevPos.y + (position.y - prevPos.y) * 0.2
         };
       });
-      requestAnimationFrame(updateFollowerPosition);
+      animationFrameId = requestAnimationFrame(updateFollowerPosition);
     };
     
     // Check if cursor is over clickable elements
@@ -73,18 +75,19 @@ const CustomCursor: React.FC = () => {
     setFollowerPosition({ x: position.x, y: position.y });
     
     // Start animation loop
-    const animationId = requestAnimationFrame(updateFollowerPosition);
+    let animationFrameId = requestAnimationFrame(updateFollowerPosition);
     
     // Add event listeners
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseleave', handleMouseLeave);
     document.addEventListener('mouseenter', handleMouseEnter);
     
+    // Clean up event listeners and animation frame
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseleave', handleMouseLeave);
       document.removeEventListener('mouseenter', handleMouseEnter);
-      cancelAnimationFrame(animationId);
+      cancelAnimationFrame(animationFrameId);
     };
   }, [position, isMobile, isVisible]);
   
@@ -92,20 +95,24 @@ const CustomCursor: React.FC = () => {
   
   return (
     <>
+      {/* Immediate cursor - no delay */}
       <div 
         className={`custom-cursor ${isClickable ? 'custom-cursor-clickable' : ''} ${isText ? 'custom-cursor-text' : ''}`}
         style={{ 
           left: `${position.x}px`, 
           top: `${position.y}px`,
-          opacity: isVisible ? 1 : 0
+          opacity: isVisible ? 1 : 0,
+          transform: 'translate(-50%, -50%)' // Center the cursor exactly on the mouse pointer
         }}
       />
+      {/* Follower cursor */}
       <div 
         className={`custom-cursor-follower ${isClickable ? 'custom-cursor-follower-clickable' : ''} ${isText ? 'custom-cursor-follower-text' : ''}`}
         style={{ 
           left: `${followerPosition.x}px`, 
           top: `${followerPosition.y}px`,
-          opacity: isVisible ? 1 : 0
+          opacity: isVisible ? 1 : 0,
+          transform: 'translate(-50%, -50%)' // Center the follower exactly
         }}
       />
     </>

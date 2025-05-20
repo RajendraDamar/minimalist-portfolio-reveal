@@ -1,7 +1,8 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { toast as sonnerToast } from 'sonner';
 
 export interface Project {
   id: string;
@@ -21,7 +22,7 @@ export const useProjects = () => {
   const [error, setError] = useState<Error | null>(null);
   const { toast } = useToast();
 
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -57,7 +58,7 @@ export const useProjects = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   const addProject = async (project: Omit<Project, 'id' | 'created_at' | 'updated_at'>, file?: File) => {
     try {
@@ -93,18 +94,15 @@ export const useProjects = () => {
       if (error) throw error;
       
       await fetchProjects();
-      toast({
-        title: "Project created",
+      sonnerToast.success("Project created", {
         description: "Your project has been successfully created."
       });
       
       return data?.[0];
     } catch (err) {
       console.error('Error adding project:', err);
-      toast({
-        title: "Error",
-        description: "Failed to create project. Please try again.",
-        variant: "destructive"
+      sonnerToast.error("Error", {
+        description: "Failed to create project. Please try again."
       });
       throw err;
     }
@@ -141,16 +139,13 @@ export const useProjects = () => {
       if (error) throw error;
       
       await fetchProjects();
-      toast({
-        title: "Project updated",
+      sonnerToast.success("Project updated", {
         description: "Your project has been successfully updated."
       });
     } catch (err) {
       console.error('Error updating project:', err);
-      toast({
-        title: "Error",
-        description: "Failed to update project. Please try again.",
-        variant: "destructive"
+      sonnerToast.error("Error", {
+        description: "Failed to update project. Please try again."
       });
       throw err;
     }
@@ -166,16 +161,13 @@ export const useProjects = () => {
       if (error) throw error;
       
       await fetchProjects();
-      toast({
-        title: "Project deleted",
+      sonnerToast.success("Project deleted", {
         description: "Your project has been successfully deleted."
       });
     } catch (err) {
       console.error('Error deleting project:', err);
-      toast({
-        title: "Error",
-        description: "Failed to delete project. Please try again.",
-        variant: "destructive"
+      sonnerToast.error("Error", {
+        description: "Failed to delete project. Please try again."
       });
       throw err;
     }
@@ -199,26 +191,32 @@ export const useProjects = () => {
         .eq('id', id);
       
       if (updateError) throw updateError;
-      await fetchProjects();
-      toast({
-        title: "Thank you!",
+      
+      // Update local state for immediate UI feedback
+      setProjects(prev => 
+        prev.map(project => 
+          project.id === id 
+            ? { ...project, likes: (project.likes || 0) + 1 } 
+            : project
+        )
+      );
+      
+      sonnerToast.success("Thank you!", {
         description: "You liked this project."
       });
     } catch (err) {
       console.error('Error incrementing likes:', err);
-      toast({
-        title: "Error",
-        description: "Failed to like project. Please try again.",
-        variant: "destructive"
+      sonnerToast.error("Error", {
+        description: "Failed to like project. Please try again."
       });
       throw err;
     }
   };
 
+  // Load projects on mount
   useEffect(() => {
     fetchProjects();
-    // Adding an empty dependency array to ensure it only runs once on mount
-  }, []);
+  }, [fetchProjects]);
 
   return { 
     projects, 

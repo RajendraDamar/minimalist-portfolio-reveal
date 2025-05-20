@@ -2,6 +2,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, X } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Project } from '@/hooks/useProjects';
 
 interface SearchBarProps {
   projects: { id: string; title: string; thumbnail?: string }[];
@@ -23,12 +25,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [isActive, setIsActive] = useState(initialIsActive);
   const [showAdminButton, setShowAdminButton] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   
-  // Search function that matches from the beginning of words
-  const handleSearch = (searchTerm: string) => {
+  // Search function that uses Supabase directly for live results
+  const handleSearch = async (searchTerm: string) => {
     setQuery(searchTerm);
     
     // Check for admin password
@@ -45,14 +48,27 @@ const SearchBar: React.FC<SearchBarProps> = ({
       return;
     }
     
-    // Filter projects that start with the search term
-    const filtered = projects.filter(project => 
-      project.title.toLowerCase().split(' ').some(word => 
-        word.toLowerCase().startsWith(searchTerm.toLowerCase())
-      )
-    );
-    
-    setResults(filtered);
+    try {
+      setIsLoading(true);
+      
+      // Use Supabase directly for searching
+      const { data, error } = await supabase
+        .from('projects')
+        .select('id, title, thumbnail')
+        .ilike('title', `%${searchTerm}%`)
+        .limit(5);
+      
+      if (error) {
+        console.error('Error searching projects:', error);
+        return;
+      }
+      
+      setResults(data || []);
+    } catch (error) {
+      console.error('Search error:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Navigate to project when selected
@@ -110,7 +126,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         {!isActive ? (
           <div 
             onClick={activateInput}
-            className="search-toggle flex items-center justify-center cursor-pointer w-full h-full"
+            className="search-toggle flex items-center justify-center cursor-pointer w-full h-full hover:opacity-80 transition-all duration-200"
           >
             <Search className="h-4 w-4 text-portfolio-white" />
             {!expanded && <span className="ml-2 text-portfolio-white/70 text-sm">Search projects...</span>}
@@ -125,7 +141,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
               onChange={(e) => handleSearch(e.target.value)}
               onFocus={() => setIsOpen(true)}
               placeholder="Search projects..."
-              className="pl-10 pr-4 py-2 w-full bg-transparent rounded-full text-sm text-portfolio-white focus:outline-none transition-all"
+              className="pl-10 pr-10 py-2 w-full bg-transparent rounded-full text-sm text-portfolio-white focus:outline-none border border-transparent focus:border-portfolio-gray/30 transition-all duration-200"
               autoFocus
             />
           </>
@@ -141,7 +157,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 closeSearch();
               }
             }}
-            className="absolute right-3"
+            className="absolute right-3 hover:opacity-80 transition-all"
           >
             <X className="h-4 w-4 text-portfolio-gray" />
           </button>
@@ -150,6 +166,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
       
       {isOpen && (query || showAdminButton) && (
         <div className="absolute mt-2 w-full bg-portfolio-lightGray/90 backdrop-blur-md rounded-md shadow-lg py-2 z-50 animate-fade-in">
+          {isLoading && (
+            <div className="px-4 py-2 text-sm text-portfolio-white/70">Searching...</div>
+          )}
+          
           {showAdminButton ? (
             <div className="px-4 py-3">
               <Link 
@@ -164,7 +184,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
               <div
                 key={project.id}
                 onClick={() => navigateToProject(project.id)}
-                className="block px-4 py-2 hover:bg-portfolio-gray/20 text-portfolio-white cursor-pointer"
+                className="block px-4 py-2 hover:bg-portfolio-gray/20 text-portfolio-white cursor-pointer transition-all duration-200"
               >
                 <div className="flex items-center">
                   {project.thumbnail && (
@@ -180,8 +200,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 </div>
               </div>
             ))
-          ) : query ? (
-            <div className="px-4 py-2 text-sm text-portfolio-darkGray">No projects found</div>
+          ) : query && !isLoading ? (
+            <div className="px-4 py-2 text-sm text-portfolio-white/70">No projects found</div>
           ) : null}
         </div>
       )}
