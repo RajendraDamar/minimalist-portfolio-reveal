@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,6 +14,7 @@ import { useToast } from "@/components/ui/use-toast";
 import CustomCursor from '@/components/CustomCursor';
 import { useProjects, Project } from '@/hooks/useProjects';
 import { supabase } from '@/integrations/supabase/client';
+import FileUpload from '@/components/FileUpload';
 
 // Form schemas
 interface ProjectFormData {
@@ -27,6 +28,7 @@ interface ProjectFormData {
 interface EditFormData {
   title: string;
   description: string;
+  thumbnail?: string;
 }
 
 const AdminPage: React.FC = () => {
@@ -36,6 +38,8 @@ const AdminPage: React.FC = () => {
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [editThumbnailFile, setEditThumbnailFile] = useState<File | null>(null);
   const { projects, loading, fetchProjects, addProject, updateProject, deleteProject } = useProjects();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -66,6 +70,7 @@ const AdminPage: React.FC = () => {
     defaultValues: {
       title: '',
       description: '',
+      thumbnail: '',
     }
   });
   
@@ -80,7 +85,7 @@ const AdminPage: React.FC = () => {
         type: data.type,
         likes: 0,
         aspect_ratio: data.aspect_ratio,
-      });
+      }, thumbnailFile || undefined);
       
       toast({
         title: "Project saved",
@@ -89,6 +94,7 @@ const AdminPage: React.FC = () => {
       
       form.reset();
       setThumbnailPreview(null);
+      setThumbnailFile(null);
       setAddDialogOpen(false);
     } catch (error) {
       console.error('Error saving project:', error);
@@ -110,8 +116,9 @@ const AdminPage: React.FC = () => {
       
       await updateProject(editingProject.id, {
         title: data.title,
-        description: data.description
-      });
+        description: data.description,
+        thumbnail: data.thumbnail
+      }, editThumbnailFile || undefined);
       
       toast({
         title: "Project updated",
@@ -119,6 +126,7 @@ const AdminPage: React.FC = () => {
       });
       
       setEditingProject(null);
+      setEditThumbnailFile(null);
     } catch (error) {
       console.error('Error updating project:', error);
       toast({
@@ -160,12 +168,35 @@ const AdminPage: React.FC = () => {
     form.setValue('thumbnail', value);
     setThumbnailPreview(value);
   };
+
+  const handleFileSelected = (file: File) => {
+    setThumbnailFile(file);
+    
+    // Create preview URL
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setThumbnailPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleEditFileSelected = (file: File) => {
+    setEditThumbnailFile(file);
+    
+    // Create preview URL
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      editForm.setValue('thumbnail', reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
   
   const openEditDialog = (project: Project) => {
     setEditingProject(project);
     editForm.reset({
       title: project.title,
-      description: project.description
+      description: project.description,
+      thumbnail: project.thumbnail
     });
   };
   
@@ -199,85 +230,100 @@ const AdminPage: React.FC = () => {
                   Add Project
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-portfolio-lightGray border-portfolio-gray text-portfolio-white">
+              <DialogContent className="bg-portfolio-lightGray border-portfolio-gray text-portfolio-white max-w-2xl">
                 <DialogHeader>
                   <DialogTitle className="text-portfolio-white">Add New Project</DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="title"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-portfolio-white">Title</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Project title" {...field} className="bg-portfolio-charcoal text-portfolio-white border-portfolio-gray" />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="description"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-portfolio-white">Description</FormLabel>
-                          <FormControl>
-                            <Textarea placeholder="Project description" className="h-24 bg-portfolio-charcoal text-portfolio-white border-portfolio-gray" {...field} />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="thumbnail"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-portfolio-white">Thumbnail URL</FormLabel>
-                          <FormControl>
-                            <Input 
-                              placeholder="https://example.com/image.jpg"
-                              {...field}
-                              onChange={handleThumbnailChange}
-                              className="bg-portfolio-charcoal text-portfolio-white border-portfolio-gray"
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    {thumbnailPreview && (
-                      <div className="mt-4 border border-portfolio-gray p-2 rounded">
-                        <img src={thumbnailPreview} alt="Thumbnail Preview" className="max-h-40 mx-auto" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-4">
+                        <FormField
+                          control={form.control}
+                          name="title"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-portfolio-white">Title</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Project title" {...field} className="bg-portfolio-charcoal text-portfolio-white border-portfolio-gray" />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="description"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-portfolio-white">Description</FormLabel>
+                              <FormControl>
+                                <Textarea placeholder="Project description" className="h-24 bg-portfolio-charcoal text-portfolio-white border-portfolio-gray" {...field} />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="aspect_ratio"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-portfolio-white">Aspect Ratio</FormLabel>
+                              <FormControl>
+                                <select
+                                  {...field}
+                                  className="w-full bg-portfolio-charcoal text-portfolio-white border border-portfolio-gray rounded p-2"
+                                >
+                                  <option value="aspect-[4/3]">4:3</option>
+                                  <option value="aspect-[16/9]">16:9</option>
+                                  <option value="aspect-[1/1]">1:1</option>
+                                  <option value="aspect-[3/4]">3:4</option>
+                                  <option value="aspect-[4/5]">4:5</option>
+                                  <option value="aspect-[3/2]">3:2</option>
+                                  <option value="aspect-[2/3]">2:3</option>
+                                </select>
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
                       </div>
-                    )}
-                    
-                    <FormField
-                      control={form.control}
-                      name="aspect_ratio"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-portfolio-white">Aspect Ratio</FormLabel>
-                          <FormControl>
-                            <select
-                              {...field}
-                              className="w-full bg-portfolio-charcoal text-portfolio-white border border-portfolio-gray rounded p-2"
-                            >
-                              <option value="aspect-[4/3]">4:3</option>
-                              <option value="aspect-[16/9]">16:9</option>
-                              <option value="aspect-[1/1]">1:1</option>
-                              <option value="aspect-[3/4]">3:4</option>
-                              <option value="aspect-[4/5]">4:5</option>
-                              <option value="aspect-[3/2]">3:2</option>
-                              <option value="aspect-[2/3]">2:3</option>
-                            </select>
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
+                      
+                      <div className="space-y-4">
+                        <FormField
+                          control={form.control}
+                          name="thumbnail"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-portfolio-white">Thumbnail</FormLabel>
+                              <div className="space-y-2">
+                                <FormLabel className="text-sm text-portfolio-darkGray">Upload an image</FormLabel>
+                                <FileUpload 
+                                  onFileSelect={handleFileSelected} 
+                                  buttonText="Upload Thumbnail"
+                                  currentUrl={thumbnailPreview || undefined}
+                                />
+                                
+                                <div className="- my-1 text-center text-portfolio-darkGray">or</div>
+                                
+                                <FormLabel className="text-sm text-portfolio-darkGray">Use an external URL</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    placeholder="https://example.com/image.jpg"
+                                    value={field.value}
+                                    onChange={(e) => {
+                                      field.onChange(e);
+                                      handleThumbnailChange(e);
+                                    }}
+                                    className="bg-portfolio-charcoal text-portfolio-white border-portfolio-gray"
+                                  />
+                                </FormControl>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
                     
                     <div className="flex justify-end gap-2 pt-2">
                       <DialogClose asChild>
@@ -389,7 +435,7 @@ const AdminPage: React.FC = () => {
       
       {/* Edit Project Dialog */}
       <Dialog open={!!editingProject} onOpenChange={(open) => !open && setEditingProject(null)}>
-        <DialogContent className="bg-portfolio-lightGray border-portfolio-gray text-portfolio-white">
+        <DialogContent className="bg-portfolio-lightGray border-portfolio-gray text-portfolio-white max-w-2xl">
           <DialogHeader className="flex justify-between items-center">
             <DialogTitle className="text-portfolio-white">Edit Project</DialogTitle>
             <Button 
@@ -405,39 +451,69 @@ const AdminPage: React.FC = () => {
           {editingProject && (
             <Form {...editForm}>
               <form onSubmit={editForm.handleSubmit(handleEditSubmit)} className="space-y-4">
-                <FormField
-                  control={editForm.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-portfolio-white">Title</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Project title" 
-                          {...field} 
-                          className="bg-portfolio-charcoal text-portfolio-white border-portfolio-gray" 
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={editForm.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-portfolio-white">Description</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Project description" 
-                          className="h-24 bg-portfolio-charcoal text-portfolio-white border-portfolio-gray" 
-                          {...field} 
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-4">
+                    <FormField
+                      control={editForm.control}
+                      name="title"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-portfolio-white">Title</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="Project title" 
+                              {...field} 
+                              className="bg-portfolio-charcoal text-portfolio-white border-portfolio-gray" 
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={editForm.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-portfolio-white">Description</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Project description" 
+                              className="h-24 bg-portfolio-charcoal text-portfolio-white border-portfolio-gray" 
+                              {...field} 
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="space-y-4">
+                    <FormField
+                      control={editForm.control}
+                      name="thumbnail"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-portfolio-white">Thumbnail</FormLabel>
+                          <div className="space-y-2">
+                            <FormLabel className="text-sm text-portfolio-darkGray">Current Thumbnail</FormLabel>
+                            <img 
+                              src={field.value} 
+                              alt="Current Thumbnail" 
+                              className="h-32 object-contain mx-auto border border-portfolio-gray/30 p-1" 
+                            />
+                            
+                            <FormLabel className="text-sm text-portfolio-darkGray mt-4">Upload new image</FormLabel>
+                            <FileUpload 
+                              onFileSelect={handleEditFileSelected} 
+                              buttonText="Change Thumbnail"
+                            />
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
                 
                 <div className="flex justify-end gap-2 pt-2">
                   <Button 

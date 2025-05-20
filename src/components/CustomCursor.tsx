@@ -61,7 +61,8 @@ const CustomCursor: React.FC = () => {
       
       // Update main cursor directly for immediate response
       if (cursorRef.current) {
-        cursorRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
+        // Apply transform with no offset to match exact mouse position
+        cursorRef.current.style.transform = `translate(-50%, -50%) translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
       }
     };
 
@@ -93,11 +94,23 @@ const CustomCursor: React.FC = () => {
     <>
       <div 
         ref={cursorRef}
-        className={`custom-cursor fixed pointer-events-none z-50 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+        className="custom-cursor fixed pointer-events-none z-50 w-4 h-4 bg-portfolio-white rounded-full transform -translate-x-1/2 -translate-y-1/2"
+        style={{ 
+          top: 0, 
+          left: 0,
+          transition: 'opacity 0.2s ease-in-out',
+          opacity: isVisible ? 0.7 : 0 
+        }}
       />
       <div 
         ref={followerRef}
-        className={`custom-cursor-follower fixed pointer-events-none z-40 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+        className="custom-cursor-follower fixed pointer-events-none z-40 w-12 h-12 border border-portfolio-white rounded-full transform -translate-x-1/2 -translate-y-1/2"
+        style={{ 
+          top: 0, 
+          left: 0,
+          transition: 'opacity 0.2s ease-in-out',
+          opacity: isVisible ? 0.5 : 0 
+        }}
       />
     </>
   );
