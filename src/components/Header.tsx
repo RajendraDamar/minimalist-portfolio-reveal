@@ -5,13 +5,10 @@ import { Link } from 'react-router-dom';
 import { Mail, Search } from 'lucide-react';
 import SearchBar from '@/components/SearchBar';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { Project } from '@/hooks/useProjects';
 
 interface HeaderProps {
-  projects: Array<{
-    id: string;
-    title: string;
-    thumbnail?: string;
-  }>;
+  projects: Project[];
 }
 
 const Header: React.FC<HeaderProps> = ({ projects }) => {
@@ -101,33 +98,30 @@ const Header: React.FC<HeaderProps> = ({ projects }) => {
             {!isMobile && (
               scrolled ? (
                 <div className="hidden sm:block absolute left-1/2 transform -translate-x-1/2 w-60 transition-all duration-300">
-                  <div 
-                    className={`search-toggle transition-all duration-300 flex items-center justify-center rounded-full ${showSearchInput ? 'w-full bg-portfolio-lightGray/30' : 'w-10 h-10 bg-portfolio-lightGray/20'} hover:bg-portfolio-lightGray/30 cursor-pointer`}
-                  >
-                    {showSearchInput ? (
-                      <SearchBar 
-                        projects={projects} 
-                        expanded={true} 
-                        closeSearch={() => setShowSearchInput(false)} 
-                        initialIsActive={true}
-                      />
-                    ) : (
-                      <Search 
-                        className="text-portfolio-white" 
-                        size={18} 
-                        onClick={toggleSearchInput}
-                      />
-                    )}
-                  </div>
+                  <SearchBar 
+                    projects={projects} 
+                    expanded={true} 
+                    initialIsActive={true}
+                  />
                 </div>
               ) : (
                 <button 
                   onClick={toggleSearchInput} 
-                  className="bg-portfolio-lightGray/20 px-4 py-2 rounded-full hover:bg-portfolio-lightGray/30 transition-all duration-300 text-sm flex items-center"
+                  className="bg-portfolio-lightGray/20 p-2 rounded-full hover:bg-portfolio-lightGray/30 transition-all duration-300 text-sm flex items-center justify-center"
                   aria-label="Search"
                 >
-                  <Search className="mr-2 text-portfolio-white" size={16} />
-                  <span className="text-portfolio-white/70">Search projects...</span>
+                  {showSearchInput ? (
+                    <div className="w-48">
+                      <SearchBar 
+                        projects={projects} 
+                        expanded={false}
+                        closeSearch={() => setShowSearchInput(false)} 
+                        initialIsActive={true}
+                      />
+                    </div>
+                  ) : (
+                    <Search className="text-portfolio-white" size={16} />
+                  )}
                 </button>
               )
             )}

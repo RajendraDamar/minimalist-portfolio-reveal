@@ -1,98 +1,130 @@
 
 import React, { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Heart, Share } from 'lucide-react';
 import CustomCursor from '@/components/CustomCursor';
-
-// Placeholder project data - Replace with your actual projects
-const projectsData = {
-  '1': {
-    title: 'Digital Artwork',
-    description: 'This project explores the intersection of digital art and traditional media techniques. Through a series of experiments with digital brushes and textures, I created a collection that blurs the boundaries between physical and digital artwork.',
-    image: 'https://images.unsplash.com/photo-1500673922987-e212871fec22',
-    details: 'Created using Procreate and Adobe Photoshop. The process involved multiple iterations and explorations of color theory and composition.',
-    year: '2023',
-    likes: 15
-  },
-  '2': {
-    title: 'Tech Solutions',
-    description: 'A comprehensive design system for a technology company that needed to unify their digital products. This project involved creating a cohesive visual language and component library that could scale across multiple platforms.',
-    image: 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b',
-    details: 'Designed using Figma with a focus on accessibility and consistent user experience across web and mobile applications.',
-    year: '2022',
-    likes: 8
-  },
-  '3': {
-    title: 'Nature Exploration',
-    description: 'A photography series documenting the hidden landscapes of national parks. This project was an exploration of natural light and composition in varied environmental conditions.',
-    image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
-    details: 'Shot on Sony A7III with minimal post-processing to preserve the authentic colors and textures of the natural world.',
-    year: '2023',
-    likes: 24
-  },
-  '4': {
-    title: 'Coding Project',
-    description: 'An interactive web application that visualizes complex data in an intuitive and engaging way. This project combines front-end development with data visualization techniques to make information more accessible.',
-    image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5',
-    details: 'Built using React, D3.js, and TypeScript. The design focuses on meaningful interactions that help users understand complex datasets.',
-    year: '2021',
-    likes: 5
-  },
-  '5': {
-    title: 'Cat Photography',
-    description: 'An intimate portrait series exploring the personality and character of feline companions. This project captures the unique expressions and behaviors of cats in their natural environments.',
-    image: 'https://images.unsplash.com/photo-1582562124811-c09040d0a901',
-    details: 'Shot in natural light settings with minimal equipment to create authentic, unposed portraits.',
-    year: '2022',
-    likes: 19
-  },
-  '6': {
-    title: 'Interior Design',
-    description: 'A complete renovation and design project for a mid-century modern home. This project balanced preserving historical elements while updating the space for contemporary living.',
-    image: 'https://images.unsplash.com/photo-1721322800607-8c38375eef04',
-    details: 'Completed in collaboration with local craftsmen using sustainable materials and techniques.',
-    year: '2023',
-    likes: 12
-  }
-};
+import { supabase } from '@/integrations/supabase/client';
+import { Project } from '@/hooks/useProjects';
+import { useToast } from "@/components/ui/use-toast";
 
 const ProjectPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const project = id ? projectsData[id as keyof typeof projectsData] : null;
+  const [project, setProject] = useState<Project | null>(null);
+  const [loading, setLoading] = useState(true);
   const [liked, setLiked] = useState(false);
-  const [likes, setLikes] = useState(project?.likes || 0);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    if (project) {
-      setLikes(project.likes);
-    }
-  }, [project]);
+    
+    const fetchProject = async () => {
+      if (!id) return;
+      
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('projects')
+          .select('*')
+          .eq('id', id)
+          .single();
+        
+        if (error) {
+          throw error;
+        }
+        
+        if (data) {
+          setProject(data as Project);
+        } else {
+          navigate('/');
+        }
+      } catch (error) {
+        console.error('Error fetching project:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load project details",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchProject();
+  }, [id, navigate, toast]);
 
-  const handleLike = () => {
-    setLiked(!liked);
-    if (liked) {
-      setLikes(prev => Math.max(0, prev - 1));
-    } else {
-      setLikes(prev => prev + 1);
+  const handleLike = async () => {
+    if (!project) return;
+    
+    try {
+      setLiked(!liked);
+      
+      if (!liked) {
+        // Increment likes locally first for better UX
+        setProject({
+          ...project,
+          likes: project.likes + 1
+        });
+        
+        // Update in database
+        const { error } = await supabase
+          .from('projects')
+          .update({ likes: project.likes + 1 })
+          .eq('id', project.id);
+          
+        if (error) throw error;
+      }
+    } catch (error) {
+      console.error('Error updating likes:', error);
+      // Revert the local change if the update fails
+      setLiked(!liked);
+      setProject({
+        ...project,
+        likes: project.likes - (liked ? 0 : 1)
+      });
+      
+      toast({
+        title: "Error",
+        description: "Failed to update likes",
+        variant: "destructive"
+      });
     }
-    // Here we would connect to Supabase to update likes
   };
 
   const handleShare = () => {
-    // Check if Web Share API is available
-    if (navigator.share) {
-      navigator.share({
-        title: project?.title || 'Project',
-        url: window.location.href
-      })
-      .catch((error) => console.log('Error sharing:', error));
-    } else {
-      // Fallback: copy to clipboard
-      navigator.clipboard.writeText(window.location.href);
-      alert('Link copied to clipboard!');
+    try {
+      // Check if Web Share API is available
+      if (navigator.share) {
+        navigator.share({
+          title: project?.title || 'Project',
+          url: window.location.href
+        })
+        .catch((error) => console.log('Error sharing:', error));
+      } else {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(window.location.href);
+        toast({
+          title: "Link copied",
+          description: "Project link copied to clipboard!"
+        });
+      }
+    } catch (error) {
+      console.error('Error sharing project:', error);
+      toast({
+        title: "Error",
+        description: "Failed to share project",
+        variant: "destructive"
+      });
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-portfolio-charcoal">
+        <p className="text-portfolio-white">Loading project...</p>
+      </div>
+    );
+  }
 
   if (!project) {
     return (
@@ -118,7 +150,7 @@ const ProjectPage: React.FC = () => {
             {/* Left column - Image */}
             <div className="w-full h-[400px] md:h-[600px] lg:h-[80vh] relative">
               <img 
-                src={project.image} 
+                src={project.thumbnail} 
                 alt={project.title} 
                 className="w-full h-full object-cover"
               />
@@ -127,15 +159,15 @@ const ProjectPage: React.FC = () => {
               <div className="absolute bottom-4 left-4 flex space-x-3">
                 <button 
                   onClick={handleLike} 
-                  className={`flex items-center space-x-2 bg-portfolio-charcoal/70 px-3 py-2 rounded-full ${liked ? 'text-red-500' : 'text-portfolio-white'}`}
+                  className={`like-button flex items-center space-x-2 bg-portfolio-charcoal/70 px-3 py-2 rounded-full ${liked ? 'text-red-500' : 'text-portfolio-white'}`}
                 >
                   <Heart size={18} fill={liked ? "currentColor" : "none"} />
-                  <span className="text-sm">{likes}</span>
+                  <span className="text-sm">{project.likes}</span>
                 </button>
                 
                 <button 
                   onClick={handleShare} 
-                  className="flex items-center space-x-2 bg-portfolio-charcoal/70 px-3 py-2 rounded-full text-portfolio-white"
+                  className="share-button flex items-center space-x-2 bg-portfolio-charcoal/70 px-3 py-2 rounded-full text-portfolio-white"
                 >
                   <Share size={18} />
                   <span className="text-sm">Share</span>
@@ -146,14 +178,9 @@ const ProjectPage: React.FC = () => {
             {/* Right column - Project details */}
             <div className="flex flex-col justify-center">
               <h1 className="text-3xl md:text-4xl font-serif font-bold text-portfolio-white mb-4 tracking-wide">{project.title.toUpperCase()}</h1>
-              <p className="text-portfolio-darkGray mb-8">{project.year}</p>
+              <p className="text-portfolio-darkGray mb-8">{new Date(project.created_at || '').getFullYear()}</p>
               
               <p className="text-lg text-portfolio-darkGray mb-8">{project.description}</p>
-              
-              <div className="border-t border-portfolio-lightGray/20 pt-8">
-                <h2 className="text-xl font-serif font-medium text-portfolio-white mb-4">Project Details</h2>
-                <p className="text-portfolio-darkGray">{project.details}</p>
-              </div>
             </div>
           </div>
         </div>

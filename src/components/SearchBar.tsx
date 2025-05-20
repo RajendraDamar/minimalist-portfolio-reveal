@@ -88,6 +88,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         // Only deactivate if we're supposed to close on outside click
         if (closeSearch) {
           setIsActive(false);
+          closeSearch();
         }
       }
     };

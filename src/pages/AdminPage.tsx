@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { useParams, Navigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,38 +8,20 @@ import { Form, FormField, FormItem, FormLabel, FormControl } from '@/components/
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft, Plus, Edit, Trash2, X } from 'lucide-react';
+import { ArrowLeft, Plus, Edit, Trash2, X, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useToast } from "@/components/ui/use-toast";
 import CustomCursor from '@/components/CustomCursor';
-
-// Mock projects (will be replaced with Supabase data)
-const initialProjects = [
-  {
-    id: '1',
-    title: 'Digital Artwork',
-    description: 'This project explores the intersection of digital art and traditional media techniques.',
-    thumbnail: 'https://images.unsplash.com/photo-1500673922987-e212871fec22',
-    type: 'image',
-    likes: 15
-  },
-  {
-    id: '2',
-    title: 'Tech Solutions',
-    description: 'A comprehensive design system for a technology company that needed to unify their digital products.',
-    thumbnail: 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b',
-    type: 'image',
-    likes: 8
-  }
-];
+import { useProjects, Project } from '@/hooks/useProjects';
+import { supabase } from '@/integrations/supabase/client';
 
 // Form schemas
 interface ProjectFormData {
-  id?: string;
   title: string;
   description: string;
-  thumbnail: File | null;
-  additionalMedia: FileList | null;
+  thumbnail: string;
+  type: 'image' | 'video';
+  aspect_ratio: string;
 }
 
 interface EditFormData {
@@ -49,11 +31,14 @@ interface EditFormData {
 
 const AdminPage: React.FC = () => {
   const { hash } = useParams<{ hash: string }>();
-  const [projects, setProjects] = useState(initialProjects);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
-  const [additionalMediaPreviews, setAdditionalMediaPreviews] = useState<string[]>([]);
-  const [editingProject, setEditingProject] = useState<typeof projects[0] | null>(null);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const { projects, loading, fetchProjects, addProject, updateProject, deleteProject } = useProjects();
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   // Validate hash to prevent unauthorized access
   const isValidHash = (hash?: string) => {
@@ -71,8 +56,9 @@ const AdminPage: React.FC = () => {
     defaultValues: {
       title: '',
       description: '',
-      thumbnail: null,
-      additionalMedia: null,
+      thumbnail: '',
+      type: 'image',
+      aspect_ratio: 'aspect-[4/3]',
     }
   });
   
@@ -84,98 +70,109 @@ const AdminPage: React.FC = () => {
   });
   
   const onSubmit = async (data: ProjectFormData) => {
-    // Here we would connect to Supabase to save the project
-    const newProject = {
-      id: Math.random().toString(36).substring(2, 9),
-      title: data.title,
-      description: data.description,
-      thumbnail: thumbnailPreview || 'https://placehold.co/600x400?text=No+Image',
-      type: 'image',
-      likes: 0
-    };
-    
-    setProjects([...projects, newProject]);
-    
-    toast({
-      title: "Project saved",
-      description: "Your project has been saved successfully.",
-    });
-    
-    form.reset();
-    setThumbnailPreview(null);
-    setAdditionalMediaPreviews([]);
-  };
-  
-  const handleEditSubmit = (data: EditFormData) => {
-    if (!editingProject) return;
-    
-    const updatedProjects = projects.map(project => 
-      project.id === editingProject.id 
-        ? { ...project, title: data.title, description: data.description } 
-        : project
-    );
-    
-    setProjects(updatedProjects);
-    setEditingProject(null);
-    
-    toast({
-      title: "Project updated",
-      description: "Your project has been updated successfully.",
-    });
-  };
-  
-  const deleteProject = (id: string) => {
-    if (confirm("Are you sure you want to delete this project?")) {
-      // Here we would connect to Supabase to delete
-      setProjects(projects.filter(project => project.id !== id));
+    try {
+      setIsSaving(true);
+      
+      await addProject({
+        title: data.title,
+        description: data.description,
+        thumbnail: thumbnailPreview || data.thumbnail || 'https://placehold.co/600x400?text=No+Image',
+        type: data.type,
+        likes: 0,
+        aspect_ratio: data.aspect_ratio,
+      });
       
       toast({
-        title: "Project deleted",
-        description: "Your project has been deleted successfully.",
+        title: "Project saved",
+        description: "Your project has been saved successfully.",
+      });
+      
+      form.reset();
+      setThumbnailPreview(null);
+      setAddDialogOpen(false);
+    } catch (error) {
+      console.error('Error saving project:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save project. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  
+  const handleEditSubmit = async (data: EditFormData) => {
+    if (!editingProject) return;
+    
+    try {
+      setIsSaving(true);
+      
+      await updateProject(editingProject.id, {
+        title: data.title,
+        description: data.description
+      });
+      
+      toast({
+        title: "Project updated",
+        description: "Your project has been updated successfully.",
+      });
+      
+      setEditingProject(null);
+    } catch (error) {
+      console.error('Error updating project:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update project. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  
+  const handleDeleteProject = async (id: string) => {
+    if (window.confirm("Are you sure you want to delete this project?")) {
+      try {
+        setIsDeleting(id);
+        await deleteProject(id);
+        
+        toast({
+          title: "Project deleted",
+          description: "Your project has been deleted successfully.",
+          variant: "destructive"
+        });
+      } catch (error) {
+        console.error('Error deleting project:', error);
+        toast({
+          title: "Error",
+          description: "Failed to delete project. Please try again.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsDeleting(null);
+      }
     }
   };
   
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
-    form.setValue('thumbnail', file);
-    
-    const reader = new FileReader();
-    reader.onload = () => {
-      setThumbnailPreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+    const value = e.target.value;
+    form.setValue('thumbnail', value);
+    setThumbnailPreview(value);
   };
   
-  const handleAdditionalMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-    
-    form.setValue('additionalMedia', files);
-    
-    const previews: string[] = [];
-    Array.from(files).forEach(file => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        previews.push(reader.result as string);
-        if (previews.length === files.length) {
-          setAdditionalMediaPreviews(previews);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-  
-  const openEditDialog = (project: typeof projects[0]) => {
+  const openEditDialog = (project: Project) => {
     setEditingProject(project);
     editForm.reset({
       title: project.title,
       description: project.description
     });
   };
+  
+  // Refresh projects list when page loads
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
   
   // Redirect if hash is invalid
   if (!isValidHash(hash)) {
@@ -195,7 +192,7 @@ const AdminPage: React.FC = () => {
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-unbounded font-medium text-portfolio-white">Admin Dashboard</h1>
             
-            <Dialog>
+            <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="bg-portfolio-gray hover:bg-portfolio-gray/80 text-portfolio-white">
                   <Plus size={16} className="mr-2" />
@@ -234,40 +231,53 @@ const AdminPage: React.FC = () => {
                       )}
                     />
                     
-                    <div className="space-y-2">
-                      <FormLabel className="text-portfolio-white">Thumbnail</FormLabel>
-                      <Input 
-                        type="file"
-                        accept="image/png,image/jpeg,image/gif"
-                        onChange={handleThumbnailChange}
-                        className="file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-portfolio-gray file:text-portfolio-white hover:file:bg-portfolio-gray/80 bg-portfolio-charcoal text-portfolio-white border-portfolio-gray"
-                      />
-                      {thumbnailPreview && (
-                        <div className="mt-4 border border-portfolio-gray p-2 rounded">
-                          <img src={thumbnailPreview} alt="Thumbnail Preview" className="max-h-40 mx-auto" />
-                        </div>
+                    <FormField
+                      control={form.control}
+                      name="thumbnail"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-portfolio-white">Thumbnail URL</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="https://example.com/image.jpg"
+                              {...field}
+                              onChange={handleThumbnailChange}
+                              className="bg-portfolio-charcoal text-portfolio-white border-portfolio-gray"
+                            />
+                          </FormControl>
+                        </FormItem>
                       )}
-                    </div>
+                    />
                     
-                    <div className="space-y-2">
-                      <FormLabel className="text-portfolio-white">Additional Media</FormLabel>
-                      <Input 
-                        type="file"
-                        multiple
-                        accept="image/png,image/jpeg,image/gif,video/mp4"
-                        onChange={handleAdditionalMediaChange}
-                        className="file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-portfolio-gray file:text-portfolio-white hover:file:bg-portfolio-gray/80 bg-portfolio-charcoal text-portfolio-white border-portfolio-gray"
-                      />
-                      {additionalMediaPreviews.length > 0 && (
-                        <div className="mt-4 grid grid-cols-3 gap-2">
-                          {additionalMediaPreviews.map((preview, index) => (
-                            <div key={index} className="border border-portfolio-gray p-1 rounded">
-                              <img src={preview} alt={`Additional Media ${index + 1}`} className="h-20 w-full object-cover" />
-                            </div>
-                          ))}
-                        </div>
+                    {thumbnailPreview && (
+                      <div className="mt-4 border border-portfolio-gray p-2 rounded">
+                        <img src={thumbnailPreview} alt="Thumbnail Preview" className="max-h-40 mx-auto" />
+                      </div>
+                    )}
+                    
+                    <FormField
+                      control={form.control}
+                      name="aspect_ratio"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-portfolio-white">Aspect Ratio</FormLabel>
+                          <FormControl>
+                            <select
+                              {...field}
+                              className="w-full bg-portfolio-charcoal text-portfolio-white border border-portfolio-gray rounded p-2"
+                            >
+                              <option value="aspect-[4/3]">4:3</option>
+                              <option value="aspect-[16/9]">16:9</option>
+                              <option value="aspect-[1/1]">1:1</option>
+                              <option value="aspect-[3/4]">3:4</option>
+                              <option value="aspect-[4/5]">4:5</option>
+                              <option value="aspect-[3/2]">3:2</option>
+                              <option value="aspect-[2/3]">2:3</option>
+                            </select>
+                          </FormControl>
+                        </FormItem>
                       )}
-                    </div>
+                    />
                     
                     <div className="flex justify-end gap-2 pt-2">
                       <DialogClose asChild>
@@ -278,8 +288,16 @@ const AdminPage: React.FC = () => {
                       <Button 
                         type="submit" 
                         className="bg-portfolio-gray hover:bg-portfolio-gray/80 text-portfolio-white"
+                        disabled={isSaving}
                       >
-                        Save Project
+                        {isSaving ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Saving...
+                          </>
+                        ) : (
+                          'Save Project'
+                        )}
                       </Button>
                     </div>
                   </form>
@@ -301,52 +319,67 @@ const AdminPage: React.FC = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {projects.map((project) => (
-                  <TableRow key={project.id} className="border-portfolio-gray/30">
-                    <TableCell>
-                      <img 
-                        src={project.thumbnail} 
-                        alt={project.title} 
-                        className="h-16 w-24 object-cover rounded" 
-                      />
-                    </TableCell>
-                    <TableCell className="text-portfolio-white font-medium">
-                      {project.title}
-                    </TableCell>
-                    <TableCell className="text-portfolio-darkGray max-w-xs truncate">
-                      {project.description}
-                    </TableCell>
-                    <TableCell className="text-portfolio-white">
-                      {project.likes}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button 
-                          onClick={() => openEditDialog(project)}
-                          size="sm" 
-                          variant="ghost" 
-                          className="h-8 w-8 p-0 text-portfolio-darkGray hover:text-portfolio-white hover:bg-portfolio-gray/20"
-                        >
-                          <Edit size={16} />
-                        </Button>
-                        <Button 
-                          onClick={() => deleteProject(project.id)} 
-                          size="sm" 
-                          variant="ghost" 
-                          className="h-8 w-8 p-0 text-portfolio-darkGray hover:text-red-500 hover:bg-portfolio-gray/20"
-                        >
-                          <Trash2 size={16} />
-                        </Button>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-8 text-portfolio-darkGray">
+                      <div className="flex justify-center items-center">
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Loading projects...
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
-                {projects.length === 0 && (
+                ) : projects.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-8 text-portfolio-darkGray">
                       No projects found. Add your first project.
                     </TableCell>
                   </TableRow>
+                ) : (
+                  projects.map((project) => (
+                    <TableRow key={project.id} className="border-portfolio-gray/30">
+                      <TableCell>
+                        <img 
+                          src={project.thumbnail} 
+                          alt={project.title} 
+                          className="h-16 w-24 object-cover rounded" 
+                        />
+                      </TableCell>
+                      <TableCell className="text-portfolio-white font-medium">
+                        {project.title}
+                      </TableCell>
+                      <TableCell className="text-portfolio-darkGray max-w-xs truncate">
+                        {project.description}
+                      </TableCell>
+                      <TableCell className="text-portfolio-white">
+                        {project.likes}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button 
+                            onClick={() => openEditDialog(project)}
+                            size="sm" 
+                            variant="ghost" 
+                            className="h-8 w-8 p-0 text-portfolio-darkGray hover:text-portfolio-white hover:bg-portfolio-gray/20"
+                          >
+                            <Edit size={16} />
+                          </Button>
+                          <Button 
+                            onClick={() => handleDeleteProject(project.id)} 
+                            size="sm" 
+                            variant="ghost" 
+                            className="h-8 w-8 p-0 text-portfolio-darkGray hover:text-red-500 hover:bg-portfolio-gray/20"
+                            disabled={isDeleting === project.id}
+                          >
+                            {isDeleting === project.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 size={16} />
+                            )}
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
                 )}
               </TableBody>
             </Table>
@@ -418,8 +451,16 @@ const AdminPage: React.FC = () => {
                   <Button 
                     type="submit" 
                     className="bg-portfolio-gray hover:bg-portfolio-gray/80 text-portfolio-white"
+                    disabled={isSaving}
                   >
-                    Save Changes
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      'Save Changes'
+                    )}
                   </Button>
                 </div>
               </form>
