@@ -33,10 +33,17 @@ export const useProjects = () => {
       
       // Convert the data to ensure it matches the Project type interface
       const typedProjects = data?.map(item => ({
-        ...item,
+        id: item.id,
+        title: item.title,
+        description: item.description || '',
+        thumbnail: item.thumbnail || '',
         // Ensure type is either 'image' or 'video', default to 'image' if invalid
-        type: (item.type === 'image' || item.type === 'video') ? item.type : 'image'
-      } as Project)) || [];
+        type: (item.type === 'image' || item.type === 'video') ? item.type as 'image' | 'video' : 'image',
+        likes: item.likes || 0,
+        aspect_ratio: item.aspect_ratio || 'aspect-[4/3]',
+        created_at: item.created_at,
+        updated_at: item.updated_at
+      })) || [];
       
       setProjects(typedProjects);
     } catch (err) {
@@ -210,6 +217,7 @@ export const useProjects = () => {
 
   useEffect(() => {
     fetchProjects();
+    // Adding an empty dependency array to ensure it only runs once on mount
   }, []);
 
   return { 

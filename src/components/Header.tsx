@@ -94,20 +94,22 @@ const Header: React.FC<HeaderProps> = ({ projects }) => {
           
           {/* Right: Search and Contact buttons - Adjusted for mobile */}
           <div className="flex items-center gap-2 sm:gap-4 transition-all duration-500">
-            {/* Search bar/button - Only on desktop */}
+            {/* Search bar/button - Moved to be next to contact when scrolled */}
             {!isMobile && (
               scrolled ? (
-                <div className="hidden sm:block absolute left-1/2 transform -translate-x-1/2 w-60 transition-all duration-300">
-                  <SearchBar 
-                    projects={projects} 
-                    expanded={true} 
-                    initialIsActive={true}
-                  />
+                <div className="flex items-center gap-2 sm:gap-4">
+                  <div className="w-60 transition-all duration-300">
+                    <SearchBar 
+                      projects={projects} 
+                      expanded={true} 
+                      initialIsActive={true}
+                    />
+                  </div>
                 </div>
               ) : (
                 <button 
                   onClick={toggleSearchInput} 
-                  className="bg-portfolio-lightGray/20 p-2 rounded-full hover:bg-portfolio-lightGray/30 transition-all duration-300 text-sm flex items-center justify-center"
+                  className="bg-portfolio-lightGray/20 p-2 rounded-full hover:bg-portfolio-lightGray/40 transition-all duration-300 text-sm flex items-center justify-center transform hover:scale-105"
                   aria-label="Search"
                 >
                   {showSearchInput ? (
@@ -129,10 +131,10 @@ const Header: React.FC<HeaderProps> = ({ projects }) => {
             {/* Contact button */}
             <Link 
               to="/contact" 
-              className={`transition-all duration-500 flex items-center rounded-full ${
+              className={`transition-all duration-300 flex items-center rounded-full transform hover:scale-105 ${
                 scrolled || isMobile
-                  ? 'bg-portfolio-lightGray/20 px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm hover:bg-portfolio-lightGray/30' 
-                  : 'bg-portfolio-lightGray/20 px-4 py-2 hover:bg-portfolio-lightGray/30'
+                  ? 'bg-portfolio-lightGray/20 px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm hover:bg-portfolio-lightGray/40' 
+                  : 'bg-portfolio-lightGray/20 px-4 py-2 hover:bg-portfolio-lightGray/40'
               }`}
             >
               <Mail size={scrolled || isMobile ? 16 : 18} className="text-portfolio-white" />

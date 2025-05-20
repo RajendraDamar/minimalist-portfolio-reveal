@@ -43,6 +43,7 @@ const AdminPage: React.FC = () => {
   const { projects, loading, fetchProjects, addProject, updateProject, deleteProject } = useProjects();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const initialLoadComplete = useRef(false);
   
   // Validate hash to prevent unauthorized access
   const isValidHash = (hash?: string) => {
@@ -74,6 +75,7 @@ const AdminPage: React.FC = () => {
     }
   });
   
+  // Modified onSubmit to handle both URL and file upload
   const onSubmit = async (data: ProjectFormData) => {
     try {
       setIsSaving(true);
@@ -200,9 +202,12 @@ const AdminPage: React.FC = () => {
     });
   };
   
-  // Refresh projects list when page loads
+  // Fetch projects only once when the component mounts
   useEffect(() => {
-    fetchProjects();
+    if (!initialLoadComplete.current) {
+      fetchProjects();
+      initialLoadComplete.current = true;
+    }
   }, [fetchProjects]);
   
   // Redirect if hash is invalid
@@ -214,7 +219,7 @@ const AdminPage: React.FC = () => {
     <div className="min-h-screen bg-portfolio-charcoal p-4 md:p-8">
       <CustomCursor />
       <div className="max-w-4xl mx-auto">
-        <Link to="/" className="inline-flex items-center text-portfolio-white hover:text-portfolio-darkGray mb-8">
+        <Link to="/" className="inline-flex items-center text-portfolio-white hover:text-portfolio-darkGray mb-8 hover:bg-portfolio-lightGray/40 px-3 py-2 rounded-md">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Home
         </Link>
@@ -304,7 +309,7 @@ const AdminPage: React.FC = () => {
                                   currentUrl={thumbnailPreview || undefined}
                                 />
                                 
-                                <div className="- my-1 text-center text-portfolio-darkGray">or</div>
+                                <div className="my-1 text-center text-portfolio-darkGray">or</div>
                                 
                                 <FormLabel className="text-sm text-portfolio-darkGray">Use an external URL</FormLabel>
                                 <FormControl>

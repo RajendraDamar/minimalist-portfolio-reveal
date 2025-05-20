@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;500;600;700&display=swap');
 
@@ -121,50 +120,17 @@
   opacity: 0 !important;
 }
 
-@keyframes pulse {
-  0% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(1.1);
-    opacity: 0.8;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 1;
-  }
-}
+/* ... keep existing code (keyframes pulse animation) */
 
-.project-item {
-  @apply relative cursor-none overflow-hidden will-change-transform;
-  margin: 0;
-  padding: 0;
-}
-
-.project-item-overlay {
-  @apply absolute inset-0 bg-gradient-to-t from-portfolio-charcoal/90 via-portfolio-charcoal/70 to-transparent opacity-0 transition-opacity duration-300 flex items-center justify-center;
-}
-
-.project-item:hover .project-item-overlay {
-  @apply opacity-100;
-}
-
-.project-item-title {
-  @apply text-portfolio-white font-display text-xl opacity-0 transform translate-y-2 transition-all duration-300 tracking-wide;
-}
-
-.project-item:hover .project-item-title {
-  @apply opacity-100 translate-y-0;
-}
-
-/* Enhanced hover effects for buttons and inputs */
+/* Enhanced button and input hover effects */
 button, 
 a,
 .search-toggle, 
 .like-button, 
 .share-button {
-  @apply transition-all duration-200;
+  @apply relative transition-all duration-200;
+  position: relative;
+  overflow: hidden;
 }
 
 button:hover:not(:disabled), 
@@ -173,14 +139,40 @@ a:hover,
 .like-button:hover, 
 .share-button:hover {
   @apply scale-105 bg-portfolio-lightGray/40;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+button:hover:not(:disabled)::after,
+a:hover::after,
+.search-toggle:hover::after,
+.like-button:hover::after,
+.share-button:hover::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
+  animation: shine 1s forwards;
+}
+
+@keyframes shine {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+  }
 }
 
 input, textarea, [contenteditable="true"] {
-  @apply transition-all duration-200;
+  @apply transition-all duration-300;
 }
 
 input:focus, textarea:focus, [contenteditable="true"]:focus {
-  @apply ring-1 ring-portfolio-white/30;
+  @apply ring-2 ring-portfolio-white/30 scale-[1.01];
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
 }
 
 /* Search input specific styles */
