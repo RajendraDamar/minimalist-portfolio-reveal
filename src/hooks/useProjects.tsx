@@ -28,7 +28,15 @@ export const useProjects = () => {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      setProjects(data || []);
+      
+      // Convert the data to ensure it matches the Project type interface
+      const typedProjects = data?.map(item => ({
+        ...item,
+        // Ensure type is either 'image' or 'video', default to 'image' if invalid
+        type: (item.type === 'image' || item.type === 'video') ? item.type : 'image'
+      } as Project)) || [];
+      
+      setProjects(typedProjects);
     } catch (err) {
       console.error('Error fetching projects:', err);
       setError(err instanceof Error ? err : new Error('Unknown error occurred'));
