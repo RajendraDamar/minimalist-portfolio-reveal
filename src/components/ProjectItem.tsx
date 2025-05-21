@@ -28,7 +28,6 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
   const [showShareMenu, setShowShareMenu] = useState(false);
   const shareMenuRef = useRef<HTMLDivElement | null>(null);
   const shareButtonRef = useRef<HTMLButtonElement | null>(null);
-  const hoverTimeoutRef = useRef<number | null>(null);
   
   const handleClick = () => {
     navigate(`/project/${id}`);
@@ -45,29 +44,6 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
     e.stopPropagation();
     setShowShareMenu(!showShareMenu);
   };
-  
-  // Use debounced hover to improve performance
-  const handleMouseEnter = () => {
-    if (hoverTimeoutRef.current) window.clearTimeout(hoverTimeoutRef.current);
-    hoverTimeoutRef.current = window.setTimeout(() => {
-      setIsHovered(true);
-    }, 10);
-  };
-  
-  const handleMouseLeave = () => {
-    if (hoverTimeoutRef.current) window.clearTimeout(hoverTimeoutRef.current);
-    hoverTimeoutRef.current = window.setTimeout(() => {
-      setIsHovered(false);
-      setShowShareMenu(false);
-    }, 10);
-  };
-  
-  // Clean up timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (hoverTimeoutRef.current) window.clearTimeout(hoverTimeoutRef.current);
-    };
-  }, []);
   
   // Close share menu when clicking outside
   useEffect(() => {
@@ -134,8 +110,11 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
       onClick={handleClick}
       className="project-item block mb-0 break-inside-avoid cursor-none"
       style={{ display: 'block' }}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        setShowShareMenu(false);
+      }}
     >
       <div className={`relative ${aspectRatio} ${background} overflow-hidden group`}>
         {type === 'image' ? (
@@ -143,7 +122,6 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
             src={thumbnail} 
             alt={title} 
             className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
-            loading="lazy"
           />
         ) : (
           <video 
@@ -156,26 +134,26 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
           />
         )}
         
-        {/* Title overlay that's always visible on hover */}
+        {/* Enhanced overlay with title that shows on hover */}
         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
           <h3 className="text-xl md:text-2xl font-unbounded text-white text-center px-4 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">{title}</h3>
         </div>
 
-        {/* Like button with count shown inline - moved higher */}
+        {/* Like button with count shown inline */}
         <button 
+          ref={shareButtonRef}
           onClick={handleLike} 
-          className="like-button absolute bottom-6 left-3 bg-portfolio-charcoal/70 hover:bg-portfolio-charcoal/90 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 text-portfolio-white flex items-center transform hover:scale-110 transition-all"
+          className="like-button absolute bottom-3 left-3 bg-portfolio-charcoal/70 hover:bg-portfolio-charcoal/90 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 text-portfolio-white flex items-center transform hover:scale-110 transition-all"
           aria-label="Like"
         >
           <Heart size={18} fill={liked ? "currentColor" : "none"} />
           {likes > 0 && <span className="like-count text-xs ml-1">{likes}</span>}
         </button>
 
-        {/* Share button - moved higher */}
+        {/* Share button */}
         <button 
-          ref={shareButtonRef}
           onClick={handleShare} 
-          className="share-button absolute bottom-6 right-3 bg-portfolio-charcoal/70 hover:bg-portfolio-charcoal/90 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 text-portfolio-white transform hover:scale-110 transition-all"
+          className="share-button absolute bottom-3 right-3 bg-portfolio-charcoal/70 hover:bg-portfolio-charcoal/90 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 text-portfolio-white transform hover:scale-110 transition-all"
           aria-label="Share"
         >
           <Share2 size={18} />
@@ -185,7 +163,7 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
         {showShareMenu && (
           <div 
             ref={shareMenuRef}
-            className="share-dropdown absolute bottom-16 right-3 bg-portfolio-gray/90 backdrop-blur-sm rounded-md shadow-lg overflow-hidden z-20"
+            className="share-dropdown absolute bottom-14 right-3 bg-portfolio-gray/90 backdrop-blur-sm rounded-md shadow-lg overflow-hidden z-20"
             onClick={(e) => e.stopPropagation()}
           >
             {shareOptions.map((option, index) => (
