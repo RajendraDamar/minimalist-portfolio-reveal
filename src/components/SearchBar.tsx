@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { Project } from '@/hooks/useProjects';
 
 interface SearchBarProps {
   projects: { id: string; title: string; thumbnail?: string }[];
@@ -140,8 +141,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
               onChange={(e) => handleSearch(e.target.value)}
               onFocus={() => setIsOpen(true)}
               placeholder="Search projects..."
-              className="pl-10 pr-10 py-2 w-full bg-portfolio-lightGray/30 rounded-full text-sm text-portfolio-white focus:outline-none border border-transparent focus:border-portfolio-gray/30 transition-all duration-200"
-              autoComplete="off"
+              className="pl-10 pr-10 py-2 w-full bg-transparent rounded-full text-sm text-portfolio-white focus:outline-none border border-transparent focus:border-portfolio-gray/30 transition-all duration-200"
+              autoFocus
             />
           </>
         )}
