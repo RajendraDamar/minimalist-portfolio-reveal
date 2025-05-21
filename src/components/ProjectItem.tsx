@@ -149,7 +149,6 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
               playsInline
               className={`w-full h-full object-cover transition-all duration-300 group-hover:scale-105 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
               onLoadedData={handleMediaLoad}
-              loading="lazy"
             />
           </>
         )}
