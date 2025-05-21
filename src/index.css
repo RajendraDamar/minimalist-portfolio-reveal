@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;500;600;700&display=swap');
 
@@ -76,51 +77,75 @@
 
 /* Base cursor styles */
 .custom-cursor {
-  @apply w-3 h-3 bg-portfolio-white;
+  width: 12px;
+  height: 12px;
+  background-color: #FFFFFF;
   position: fixed;
   pointer-events: none;
   border-radius: 50%;
   z-index: 9999;
-  will-change: transform;
   transform: translate(-50%, -50%);
-  transition: opacity 0.3s ease, width 0.2s, height 0.2s;
+  transition: width 0.2s, height 0.2s;
   mix-blend-mode: difference;
+  will-change: transform;
 }
 
 .custom-cursor-follower {
-  @apply w-5 h-5 border border-portfolio-white;
+  width: 20px;
+  height: 20px;
+  border: 1px solid #FFFFFF;
   position: fixed;
   pointer-events: none;
   border-radius: 50%;
   z-index: 9998;
-  will-change: transform;
   transform: translate(-50%, -50%);
-  transition: opacity 0.3s ease, width 0.2s, height 0.2s, border-radius 0.2s;
+  transition: width 0.2s, height 0.2s, border-radius 0.2s;
+  will-change: transform;
 }
 
 /* Cursor variants */
 .custom-cursor-clickable {
-  @apply w-4 h-4 bg-portfolio-white;
+  width: 16px;
+  height: 16px;
+  background-color: #FFFFFF;
   mix-blend-mode: difference;
 }
 
 .custom-cursor-follower-clickable {
-  @apply w-8 h-8;
+  width: 32px;
+  height: 32px;
   border-color: rgba(255, 255, 255, 0.5);
   animation: pulse 1.5s infinite;
 }
 
 .custom-cursor-text {
-  @apply w-1 h-5 bg-portfolio-white;
+  width: 4px;
+  height: 20px;
+  background-color: #FFFFFF;
   border-radius: 1px;
 }
 
 .custom-cursor-follower-text {
-  @apply w-0 h-0 border-0;
+  width: 0;
+  height: 0;
+  border: 0;
   opacity: 0 !important;
 }
 
-/* ... keep existing code (keyframes pulse animation) */
+@keyframes pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.7;
+  }
+}
 
 /* Enhanced button and input hover effects */
 button, 
@@ -188,35 +213,7 @@ input:focus, textarea:focus, [contenteditable="true"]:focus {
   @apply h-10 rounded-full;
 }
 
-.masonry-grid {
-  @apply w-full;
-  column-count: 1;
-  column-gap: 0;
-}
-
-@screen sm {
-  .masonry-grid {
-    column-count: 2;
-  }
-}
-
-@screen md {
-  .masonry-grid {
-    column-count: 3;
-  }
-}
-
-@screen lg {
-  .masonry-grid {
-    column-count: 4;
-  }
-}
-
-@screen xl {
-  .masonry-grid {
-    column-count: 5;
-  }
-}
+/* ... keep existing code (masonry-grid styles) */
 
 @keyframes fadeIn {
   from { opacity: 0; }
@@ -273,18 +270,19 @@ input:focus, textarea:focus, [contenteditable="true"]:focus {
 /* Project hover grayscale effect */
 .project-item:hover img,
 .project-item:hover video {
-  @apply grayscale;
+  @apply filter-none;
+  transition: all 0.3s ease;
+}
+
+.project-item img,
+.project-item video {
+  @apply grayscale-[30%];
+  transition: all 0.3s ease;
 }
 
 /* Mobile optimizations */
 @media (max-width: 640px) {
-  .project-item-title {
-    @apply text-base;
-  }
-  
-  header {
-    @apply py-2;
-  }
+  /* ... keep existing code (mobile optimizations) */
   
   body {
     cursor: auto !important;
@@ -296,28 +294,37 @@ input:focus, textarea:focus, [contenteditable="true"]:focus {
   .like-button, .share-button {
     cursor: auto !important;
   }
-  
-  /* Mobile header optimizations */
-  header .container {
-    @apply px-3;
+}
+
+/* Optimize masonry grid for performance */
+.masonry-grid {
+  @apply w-full;
+  column-count: 1;
+  column-gap: 0;
+  will-change: transform;
+  contain: content;
+}
+
+@screen sm {
+  .masonry-grid {
+    column-count: 2;
   }
-  
-  header h1 {
-    @apply text-lg;
+}
+
+@screen md {
+  .masonry-grid {
+    column-count: 3;
   }
-  
-  /* Use the padding from the container for mobile */
-  header .absolute {
-    @apply px-3;
+}
+
+@screen lg {
+  .masonry-grid {
+    column-count: 4;
   }
-  
-  /* Mobile likes display */
-  .like-count {
-    @apply ml-1;
-  }
-  
-  /* Ensure vignette shows on mobile */
-  .header-vignette {
-    @apply opacity-100;
+}
+
+@screen xl {
+  .masonry-grid {
+    column-count: 5;
   }
 }

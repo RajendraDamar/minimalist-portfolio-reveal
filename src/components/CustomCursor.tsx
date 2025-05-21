@@ -1,34 +1,62 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 const CustomCursor: React.FC = () => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [followerPosition, setFollowerPosition] = useState({ x: 0, y: 0 });
   const [isClickable, setIsClickable] = useState(false);
   const [isText, setIsText] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const isMobile = useMediaQuery('(max-width: 640px)');
   
+  // Refs for better performance
+  const cursorRef = useRef<HTMLDivElement>(null);
+  const followerRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number | null>(null);
+  
   useEffect(() => {
     // Skip cursor customization on mobile devices
     if (isMobile) return;
     
+    let lastX = 0;
+    let lastY = 0;
+    let cursorX = 0;
+    let cursorY = 0;
+    
+    // Throttle mousemove updates for better performance
     const updatePosition = (e: MouseEvent) => {
-      setPosition({ x: e.clientX, y: e.clientY });
+      cursorX = e.clientX;
+      cursorY = e.clientY;
+      
+      // Update main cursor immediately for responsiveness
+      if (cursorRef.current) {
+        cursorRef.current.style.transform = `translate(${cursorX}px, ${cursorY}px)`;
+      }
+      
+      if (!isVisible) {
+        setIsVisible(true);
+      }
     };
     
-    // Optimize follower position updates with RAF and improved smoothing
-    const updateFollowerPosition = () => {
-      setFollowerPosition(prevPos => {
-        // Use a faster animation for smoother following (0.2 instead of 0.1)
-        return {
-          x: prevPos.x + (position.x - prevPos.x) * 0.2,
-          y: prevPos.y + (position.y - prevPos.y) * 0.2
-        };
-      });
-      animationFrameId = requestAnimationFrame(updateFollowerPosition);
+    // Smooth follower position with RAF
+    const animateFollower = () => {
+      // Smoother easing with better performance
+      const easeFactor = 0.15; // Higher = faster following, lower = more laggy
+      
+      // Calculate the distance between current and target
+      lastX = lastX + (cursorX - lastX) * easeFactor;
+      lastY = lastY + (cursorY - lastY) * easeFactor;
+      
+      // Update follower with transformed position
+      if (followerRef.current) {
+        followerRef.current.style.transform = `translate(${lastX}px, ${lastY}px)`;
+      }
+      
+      rafRef.current = requestAnimationFrame(animateFollower);
     };
+    
+    // Start animation loop
+    rafRef.current = requestAnimationFrame(animateFollower);
     
     // Check if cursor is over clickable elements
     const checkClickable = (e: MouseEvent) => {
@@ -54,10 +82,6 @@ const CustomCursor: React.FC = () => {
     const handleMouseMove = (e: MouseEvent) => {
       updatePosition(e);
       checkClickable(e);
-      
-      if (!isVisible) {
-        setIsVisible(true);
-      }
     };
     
     // Hide cursor when leaving window
@@ -71,14 +95,8 @@ const CustomCursor: React.FC = () => {
       updatePosition(e);
     };
     
-    // Initialize follower position
-    setFollowerPosition({ x: position.x, y: position.y });
-    
-    // Start animation loop
-    let animationFrameId = requestAnimationFrame(updateFollowerPosition);
-    
-    // Add event listeners
-    document.addEventListener('mousemove', handleMouseMove);
+    // Add event listeners with passive option for better performance
+    document.addEventListener('mousemove', handleMouseMove, { passive: true });
     document.addEventListener('mouseleave', handleMouseLeave);
     document.addEventListener('mouseenter', handleMouseEnter);
     
@@ -87,9 +105,9 @@ const CustomCursor: React.FC = () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseleave', handleMouseLeave);
       document.removeEventListener('mouseenter', handleMouseEnter);
-      cancelAnimationFrame(animationFrameId);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, [position, isMobile, isVisible]);
+  }, [isMobile, isVisible]);
   
   if (isMobile) return null;
   
@@ -97,21 +115,23 @@ const CustomCursor: React.FC = () => {
     <>
       {/* Immediate cursor - no delay */}
       <div 
+        ref={cursorRef}
         className={`custom-cursor ${isClickable ? 'custom-cursor-clickable' : ''} ${isText ? 'custom-cursor-text' : ''}`}
         style={{ 
-          left: `${position.x}px`, 
-          top: `${position.y}px`,
           opacity: isVisible ? 1 : 0,
-          transform: 'translate(-50%, -50%)' // Center the cursor exactly on the mouse pointer
+          left: '-100px',  // Initial off-screen position
+          top: '-100px',
+          transform: 'translate(-50%, -50%)' // Center the cursor exactly
         }}
       />
       {/* Follower cursor */}
       <div 
+        ref={followerRef}
         className={`custom-cursor-follower ${isClickable ? 'custom-cursor-follower-clickable' : ''} ${isText ? 'custom-cursor-follower-text' : ''}`}
         style={{ 
-          left: `${followerPosition.x}px`, 
-          top: `${followerPosition.y}px`,
           opacity: isVisible ? 1 : 0,
+          left: '-100px',  // Initial off-screen position
+          top: '-100px',
           transform: 'translate(-50%, -50%)' // Center the follower exactly
         }}
       />

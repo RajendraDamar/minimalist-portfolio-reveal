@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Heart, Share2 } from 'lucide-react';
 
@@ -26,6 +26,7 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
   const [isHovered, setIsHovered] = useState(false);
   const [liked, setLiked] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
   const shareMenuRef = useRef<HTMLDivElement | null>(null);
   const shareButtonRef = useRef<HTMLButtonElement | null>(null);
   
@@ -104,11 +105,16 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
     { name: 'WhatsApp', action: () => window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareTitle + ' ' + shareUrl)}`, '_blank') },
     { name: 'Email', action: () => window.open(`mailto:?subject=${encodeURIComponent(shareTitle)}&body=${encodeURIComponent(shareUrl)}`, '_blank') }
   ];
+
+  // Handle media load completion
+  const handleMediaLoad = () => {
+    setIsLoaded(true);
+  };
   
   return (
     <div 
       onClick={handleClick}
-      className="project-item block mb-0 break-inside-avoid cursor-none"
+      className="project-item block mb-0 break-inside-avoid cursor-none relative"
       style={{ display: 'block' }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
@@ -118,20 +124,34 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
     >
       <div className={`relative ${aspectRatio} ${background} overflow-hidden group`}>
         {type === 'image' ? (
-          <img 
-            src={thumbnail} 
-            alt={title} 
-            className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
-          />
+          <>
+            {!isLoaded && (
+              <div className="absolute inset-0 bg-portfolio-lightGray animate-pulse"></div>
+            )}
+            <img 
+              src={thumbnail} 
+              alt={title} 
+              className={`w-full h-full object-cover transition-all duration-300 group-hover:scale-105 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+              onLoad={handleMediaLoad}
+              loading="lazy"
+            />
+          </>
         ) : (
-          <video 
-            src={thumbnail} 
-            autoPlay 
-            muted 
-            loop 
-            playsInline
-            className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
-          />
+          <>
+            {!isLoaded && (
+              <div className="absolute inset-0 bg-portfolio-lightGray animate-pulse"></div>
+            )}
+            <video 
+              src={thumbnail} 
+              autoPlay 
+              muted 
+              loop 
+              playsInline
+              className={`w-full h-full object-cover transition-all duration-300 group-hover:scale-105 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+              onLoadedData={handleMediaLoad}
+              loading="lazy"
+            />
+          </>
         )}
         
         {/* Enhanced overlay with title that shows on hover */}
@@ -139,21 +159,21 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
           <h3 className="text-xl md:text-2xl font-unbounded text-white text-center px-4 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">{title}</h3>
         </div>
 
-        {/* Like button with count shown inline */}
+        {/* Like button with count shown inline - positioned higher */}
         <button 
-          ref={shareButtonRef}
           onClick={handleLike} 
-          className="like-button absolute bottom-3 left-3 bg-portfolio-charcoal/70 hover:bg-portfolio-charcoal/90 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 text-portfolio-white flex items-center transform hover:scale-110 transition-all"
+          className="like-button absolute bottom-6 left-3 bg-portfolio-charcoal/70 hover:bg-portfolio-charcoal/90 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 text-portfolio-white flex items-center transform hover:scale-110 transition-all"
           aria-label="Like"
         >
           <Heart size={18} fill={liked ? "currentColor" : "none"} />
           {likes > 0 && <span className="like-count text-xs ml-1">{likes}</span>}
         </button>
 
-        {/* Share button */}
+        {/* Share button - positioned higher */}
         <button 
+          ref={shareButtonRef}
           onClick={handleShare} 
-          className="share-button absolute bottom-3 right-3 bg-portfolio-charcoal/70 hover:bg-portfolio-charcoal/90 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 text-portfolio-white transform hover:scale-110 transition-all"
+          className="share-button absolute bottom-6 right-3 bg-portfolio-charcoal/70 hover:bg-portfolio-charcoal/90 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 text-portfolio-white transform hover:scale-110 transition-all"
           aria-label="Share"
         >
           <Share2 size={18} />
