@@ -131,14 +131,20 @@ export const useProjects = () => {
         updatedData.thumbnail = publicUrl;
       }
       
+      // Fix: Wait for the update to complete and check for errors
       const { error } = await supabase
         .from('projects')
         .update(updatedData)
         .eq('id', id);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase update error:', error);
+        throw error;
+      }
       
-      await fetchProjects();
+      // Only show success message and update state if update succeeded
+      await fetchProjects(); // Refresh the projects after update
+      
       sonnerToast.success("Project updated", {
         description: "Your project has been successfully updated."
       });

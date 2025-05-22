@@ -26,6 +26,7 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
   const [isHovered, setIsHovered] = useState(false);
   const [liked, setLiked] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
   const shareMenuRef = useRef<HTMLDivElement | null>(null);
   const shareButtonRef = useRef<HTMLButtonElement | null>(null);
   
@@ -43,6 +44,11 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
     setShowShareMenu(!showShareMenu);
+  };
+  
+  // Handle image/video loaded state
+  const handleMediaLoaded = () => {
+    setIsLoaded(true);
   };
   
   // Close share menu when clicking outside
@@ -121,7 +127,9 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
           <img 
             src={thumbnail} 
             alt={title} 
-            className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
+            className={`w-full h-full object-cover transition-all duration-300 group-hover:scale-105 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+            onLoad={handleMediaLoaded}
+            loading="lazy"
           />
         ) : (
           <video 
@@ -130,8 +138,16 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
             muted 
             loop 
             playsInline
-            className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
+            className={`w-full h-full object-cover transition-all duration-300 group-hover:scale-105 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+            onLoadedData={handleMediaLoaded}
           />
+        )}
+        
+        {/* Loading indicator */}
+        {!isLoaded && (
+          <div className="absolute inset-0 flex items-center justify-center bg-portfolio-charcoal">
+            <div className="w-6 h-6 border-2 border-portfolio-darkGray border-t-portfolio-white rounded-full animate-spin"></div>
+          </div>
         )}
         
         {/* Enhanced overlay with title that shows on hover */}
@@ -139,27 +155,30 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
           <h3 className="text-xl md:text-2xl font-unbounded text-white text-center px-4 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">{title}</h3>
         </div>
 
-        {/* Like button with count shown inline */}
-        <button 
-          ref={shareButtonRef}
-          onClick={handleLike} 
-          className="like-button absolute bottom-3 left-3 bg-portfolio-charcoal/70 hover:bg-portfolio-charcoal/90 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 text-portfolio-white flex items-center transform hover:scale-110 transition-all"
-          aria-label="Like"
-        >
-          <Heart size={18} fill={liked ? "currentColor" : "none"} />
-          {likes > 0 && <span className="like-count text-xs ml-1">{likes}</span>}
-        </button>
+        {/* Fixed positioning for buttons to ensure they're always visible */}
+        <div className="absolute bottom-3 left-0 right-0 flex justify-between px-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+          {/* Like button with count shown inline */}
+          <button 
+            onClick={handleLike} 
+            className="like-button bg-portfolio-charcoal/70 hover:bg-portfolio-charcoal/90 p-2 rounded-full text-portfolio-white flex items-center transform hover:scale-110 transition-all"
+            aria-label="Like"
+          >
+            <Heart size={18} fill={liked ? "currentColor" : "none"} />
+            {likes > 0 && <span className="like-count text-xs ml-1">{likes}</span>}
+          </button>
 
-        {/* Share button */}
-        <button 
-          onClick={handleShare} 
-          className="share-button absolute bottom-3 right-3 bg-portfolio-charcoal/70 hover:bg-portfolio-charcoal/90 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 text-portfolio-white transform hover:scale-110 transition-all"
-          aria-label="Share"
-        >
-          <Share2 size={18} />
-        </button>
+          {/* Share button */}
+          <button 
+            ref={shareButtonRef}
+            onClick={handleShare} 
+            className="share-button bg-portfolio-charcoal/70 hover:bg-portfolio-charcoal/90 p-2 rounded-full text-portfolio-white transform hover:scale-110 transition-all"
+            aria-label="Share"
+          >
+            <Share2 size={18} />
+          </button>
+        </div>
         
-        {/* Share dropdown menu */}
+        {/* Share dropdown menu - positioned relative to the button */}
         {showShareMenu && (
           <div 
             ref={shareMenuRef}
